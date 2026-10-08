@@ -1,5 +1,6 @@
 package com.example.phonebridge.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,13 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.phonebridge.ui.theme.CardBackground
-import com.example.phonebridge.ui.theme.PrimaryBlue
-import com.example.phonebridge.ui.theme.TextSecondary
+import com.example.phonebridge.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,84 +49,125 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CyberBackground)
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
         Text(
-            text = "Settings",
+            text = "Cloud & App Settings",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = Color.White
         )
         Text(
-            text = "Configure server connection & preferences",
+            text = "Connected to Render 24/7 Cloud Server",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary
+            color = CyanPrimary
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Backend URL
-        OutlinedTextField(
-            value = url,
-            onValueChange = { url = it },
-            label = { Text("Backend URL") },
-            placeholder = { Text("http://10.0.2.2:3000 or https://...") },
+        // Backend URL Card
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = Color.DarkGray
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = CyberCard),
+            border = CardDefaults.outlinedCardBorder().copy(
+                brush = Brush.horizontalGradient(listOf(CyberCardBorder, CyberCardBorder))
             )
-        )
-        Text(
-            text = "Tip: For Android emulator use http://10.0.2.2:3000. For physical devices use local IP or HTTPS tunnel (ngrok).",
-            color = TextSecondary,
-            fontSize = 12.sp,
-            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-        )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Backend Server URL",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    placeholder = { Text("https://alexa-phonebridge.onrender.com") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = CyanPrimary,
+                        unfocusedBorderColor = CyberCardBorder,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Default: https://alexa-phonebridge.onrender.com (Live Render 24/7 cloud)",
+                    color = TextMuted,
+                    fontSize = 11.sp
+                )
+            }
+        }
 
-        // Device Auth Token
-        OutlinedTextField(
-            value = token,
-            onValueChange = { token = it },
-            label = { Text("Device Authentication Token") },
-            placeholder = { Text("Matches DEVICE_TOKEN in backend .env") },
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Auth & Identity Card
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = Color.DarkGray
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = CyberCard),
+            border = CardDefaults.outlinedCardBorder().copy(
+                brush = Brush.horizontalGradient(listOf(CyberCardBorder, CyberCardBorder))
             )
-        )
-        Text(
-            text = "Shared secret protecting backend REST & WebSocket endpoints.",
-            color = TextSecondary,
-            fontSize = 12.sp,
-            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-        )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Authentication & Device Identity",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
 
-        // Device ID
-        OutlinedTextField(
-            value = deviceId,
-            onValueChange = { deviceId = it },
-            label = { Text("Device ID") },
-            placeholder = { Text("e.g. phone-pixel7") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = Color.DarkGray
-            )
-        )
+                OutlinedTextField(
+                    value = token,
+                    onValueChange = { token = it },
+                    label = { Text("Device Secret Token") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = CyanPrimary,
+                        unfocusedBorderColor = CyberCardBorder,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = deviceId,
+                    onValueChange = { deviceId = it },
+                    label = { Text("Device ID") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = CyanPrimary,
+                        unfocusedBorderColor = CyberCardBorder,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Toggles Card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = CardBackground)
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = CyberCard),
+            border = CardDefaults.outlinedCardBorder().copy(
+                brush = Brush.horizontalGradient(listOf(CyberCardBorder, CyberCardBorder))
+            )
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Notifications toggle
@@ -136,13 +177,17 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Enable call notifications", color = Color.White, fontWeight = FontWeight.Medium)
+                        Text("Call Notifications", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                         Text("Show ongoing heads-up notification with action buttons", color = TextSecondary, fontSize = 12.sp)
                     }
-                    Switch(checked = notifs, onCheckedChange = { notifs = it })
+                    Switch(
+                        checked = notifs,
+                        onCheckedChange = { notifs = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = CyanPrimary)
+                    )
                 }
 
-                Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 12.dp))
+                Divider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
 
                 // Caller announcement toggle
                 Row(
@@ -151,13 +196,17 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Enable caller announcement", color = Color.White, fontWeight = FontWeight.Medium)
-                        Text("Send caller contact name to backend for Alexa", color = TextSecondary, fontSize = 12.sp)
+                        Text("Caller Announcement", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("Forward caller name to Alexa Echo for voice announcement", color = TextSecondary, fontSize = 12.sp)
                     }
-                    Switch(checked = announce, onCheckedChange = { announce = it })
+                    Switch(
+                        checked = announce,
+                        onCheckedChange = { announce = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = CyanPrimary)
+                    )
                 }
 
-                Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 12.dp))
+                Divider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
 
                 // Debug logging toggle
                 Row(
@@ -166,13 +215,17 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Debug logging", color = Color.White, fontWeight = FontWeight.Medium)
-                        Text("Record tagged events on the Developer Log screen", color = TextSecondary, fontSize = 12.sp)
+                        Text("Developer Activity Logging", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("Record real-time Alexa voice logs on device", color = TextSecondary, fontSize = 12.sp)
                     }
-                    Switch(checked = debug, onCheckedChange = { debug = it })
+                    Switch(
+                        checked = debug,
+                        onCheckedChange = { debug = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = CyanPrimary)
+                    )
                 }
 
-                Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 12.dp))
+                Divider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
 
                 // Test Mode toggle
                 Row(
@@ -181,10 +234,14 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Test Mode (Simulated Telecom)", color = Color.White, fontWeight = FontWeight.Medium)
-                        Text("Simulate answering & rejecting calls safely without cellular access", color = TextSecondary, fontSize = 12.sp)
+                        Text("Test Mode (Simulated Calls)", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("Simulate answering & rejecting calls safely", color = TextSecondary, fontSize = 12.sp)
                     }
-                    Switch(checked = testMode, onCheckedChange = { testMode = it })
+                    Switch(
+                        checked = testMode,
+                        onCheckedChange = { testMode = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = NeonGreen)
+                    )
                 }
             }
         }
@@ -196,10 +253,10 @@ fun SettingsScreen(
                 onSaveSettings(url, token, deviceId, notifs, announce, debug, testMode)
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
         ) {
-            Text("Save & Reconnect", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Text("Save & Reconnect", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         }
 
         Spacer(modifier = Modifier.height(30.dp))

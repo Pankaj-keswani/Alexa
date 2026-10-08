@@ -27,7 +27,8 @@ import com.example.phonebridge.ui.screens.LogsScreen
 import com.example.phonebridge.ui.screens.MainDashboardScreen
 import com.example.phonebridge.ui.screens.SettingsScreen
 import com.example.phonebridge.ui.screens.TestSimulationScreen
-import com.example.phonebridge.ui.theme.PhoneBridgeTheme
+import androidx.compose.ui.graphics.Color
+import com.example.phonebridge.ui.theme.*
 import com.example.phonebridge.viewmodel.PhoneBridgeViewModel
 
 class MainActivity : ComponentActivity() {
@@ -76,30 +77,61 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        NavigationBar {
+                        NavigationBar(
+                            containerColor = CyberSurface,
+                            contentColor = TextPrimary
+                        ) {
                             NavigationBarItem(
                                 selected = selectedTab == 0,
                                 onClick = { selectedTab = 0 },
                                 icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                                label = { Text("Dashboard") }
+                                label = { Text("Dashboard") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = CyanPrimary,
+                                    indicatorColor = CyanPrimary,
+                                    unselectedIconColor = TextSecondary,
+                                    unselectedTextColor = TextSecondary
+                                )
                             )
                             NavigationBarItem(
                                 selected = selectedTab == 1,
                                 onClick = { selectedTab = 1 },
                                 icon = { Icon(Icons.Default.Build, contentDescription = "Test Mode") },
-                                label = { Text("Test Mode") }
+                                label = { Text("Test Mode") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = CyanPrimary,
+                                    indicatorColor = CyanPrimary,
+                                    unselectedIconColor = TextSecondary,
+                                    unselectedTextColor = TextSecondary
+                                )
                             )
                             NavigationBarItem(
                                 selected = selectedTab == 2,
                                 onClick = { selectedTab = 2 },
                                 icon = { Icon(Icons.Default.List, contentDescription = "Logs") },
-                                label = { Text("Logs") }
+                                label = { Text("Logs") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = CyanPrimary,
+                                    indicatorColor = CyanPrimary,
+                                    unselectedIconColor = TextSecondary,
+                                    unselectedTextColor = TextSecondary
+                                )
                             )
                             NavigationBarItem(
                                 selected = selectedTab == 3,
                                 onClick = { selectedTab = 3 },
                                 icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                                label = { Text("Settings") }
+                                label = { Text("Settings") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = CyanPrimary,
+                                    indicatorColor = CyanPrimary,
+                                    unselectedIconColor = TextSecondary,
+                                    unselectedTextColor = TextSecondary
+                                )
                             )
                         }
                     }
@@ -170,7 +202,9 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.READ_PHONE_STATE,
                 Manifest.permission.READ_CALL_LOG,
                 Manifest.permission.READ_CONTACTS,
-                Manifest.permission.ANSWER_PHONE_CALLS
+                Manifest.permission.ANSWER_PHONE_CALLS,
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.SEND_SMS
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
