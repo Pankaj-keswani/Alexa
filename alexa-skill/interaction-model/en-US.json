@@ -1,0 +1,103 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "mobile buddy",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": [
+            "cancel",
+            "never mind",
+            "forget it"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "help",
+            "what can you do",
+            "how do I use phone bridge"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "stop",
+            "bye",
+            "goodbye",
+            "exit"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "GetCallerIntent",
+          "slots": [],
+          "samples": [
+            "who is calling",
+            "who is calling me",
+            "tell me who is calling",
+            "who's calling",
+            "who's calling me",
+            "who is on the phone",
+            "who is ringing",
+            "who is calling on my phone",
+            "caller details",
+            "tell me the caller"
+          ]
+        },
+        {
+          "name": "AnswerCallIntent",
+          "slots": [],
+          "samples": [
+            "answer",
+            "answer the call",
+            "pick up",
+            "accept the call",
+            "pick up the call",
+            "answer phone",
+            "pick up my phone",
+            "accept incoming call",
+            "take the call"
+          ]
+        },
+        {
+          "name": "RejectCallIntent",
+          "slots": [],
+          "samples": [
+            "reject",
+            "reject the call",
+            "decline the call",
+            "hang up the incoming call",
+            "decline",
+            "drop the call",
+            "disconnect",
+            "ignore call",
+            "reject phone call"
+          ]
+        },
+        {
+          "name": "CallStatusIntent",
+          "slots": [],
+          "samples": [
+            "what's the call status",
+            "tell me the call status",
+            "is someone calling",
+            "check my phone",
+            "what is the call status",
+            "check incoming calls",
+            "is my phone ringing",
+            "call status"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}

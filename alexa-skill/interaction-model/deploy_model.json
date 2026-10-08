@@ -1,0 +1,630 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "mobile buddy",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": [
+            "cancel",
+            "never mind",
+            "forget it"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "help",
+            "what can you do",
+            "how do I use mobile buddy",
+            "what commands can I say"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "stop",
+            "bye",
+            "goodbye",
+            "exit"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "GetCallerIntent",
+          "slots": [],
+          "samples": [
+            "who is calling",
+            "who is calling me",
+            "tell me who is calling",
+            "who's calling",
+            "who's calling me",
+            "who is on the phone",
+            "who is ringing",
+            "who is calling on my phone",
+            "caller details",
+            "tell me the caller",
+            "caller id"
+          ]
+        },
+        {
+          "name": "AnswerCallIntent",
+          "slots": [],
+          "samples": [
+            "answer",
+            "answer the call",
+            "pick up",
+            "accept the call",
+            "pick up the call",
+            "answer phone",
+            "pick up my phone",
+            "accept incoming call",
+            "take the call"
+          ]
+        },
+        {
+          "name": "RejectCallIntent",
+          "slots": [],
+          "samples": [
+            "reject",
+            "reject the call",
+            "decline the call",
+            "hang up the incoming call",
+            "decline",
+            "drop the call",
+            "disconnect",
+            "ignore call",
+            "reject phone call"
+          ]
+        },
+        {
+          "name": "CallStatusIntent",
+          "slots": [],
+          "samples": [
+            "what's the call status",
+            "tell me the call status",
+            "is someone calling",
+            "check my phone",
+            "what is the call status",
+            "check incoming calls",
+            "is my phone ringing",
+            "call status"
+          ]
+        },
+        {
+          "name": "FindPhoneIntent",
+          "slots": [],
+          "samples": [
+            "find my phone",
+            "where is my phone",
+            "ring my phone",
+            "locate my phone",
+            "ring phone",
+            "make my phone ring",
+            "find phone",
+            "trigger siren",
+            "start phone alarm",
+            "ring my mobile",
+            "find my mobile"
+          ]
+        },
+        {
+          "name": "StopFindPhoneIntent",
+          "slots": [],
+          "samples": [
+            "stop finding my phone",
+            "stop ringing my phone",
+            "stop the siren",
+            "silence my phone",
+            "stop ringing",
+            "stop alarm",
+            "stop phone alarm",
+            "found my phone",
+            "i found my phone",
+            "stop finding phone",
+            "stop phone ringing"
+          ]
+        },
+        {
+          "name": "BatteryStatusIntent",
+          "slots": [],
+          "samples": [
+            "what is my battery level",
+            "what's my battery level",
+            "check my battery",
+            "what is my phone battery",
+            "what's my phone battery",
+            "how much battery is left",
+            "phone battery status",
+            "phone battery",
+            "battery level",
+            "check phone battery",
+            "battery status",
+            "how much charge does my phone have",
+            "is my phone charging",
+            "battery percentage"
+          ]
+        },
+        {
+          "name": "FlashlightIntent",
+          "slots": [
+            {
+              "name": "state",
+              "type": "DeviceState"
+            }
+          ],
+          "samples": [
+            "turn {state} the flashlight",
+            "turn {state} flashlight",
+            "turn {state} the torch",
+            "turn {state} torch",
+            "turn {state} my phone light",
+            "turn {state} phone light",
+            "flashlight {state}",
+            "torch {state}",
+            "turn on flashlight",
+            "turn off flashlight",
+            "turn on torch",
+            "turn off torch",
+            "turn on the flashlight",
+            "turn off the flashlight",
+            "turn on the torch",
+            "turn off the torch"
+          ]
+        },
+        {
+          "name": "MakeCallIntent",
+          "slots": [
+            {
+              "name": "target",
+              "type": "ContactTarget"
+            }
+          ],
+          "samples": [
+            "call {target}",
+            "dial {target}",
+            "phone {target}",
+            "call {target} on speaker",
+            "call {target} on speakerphone",
+            "make a call to {target}",
+            "place a call to {target}",
+            "dial number {target}",
+            "please call {target}",
+            "call to {target}"
+          ]
+        },
+        {
+          "name": "SendWhatsAppIntent",
+          "slots": [
+            {
+              "name": "target",
+              "type": "ContactTarget"
+            },
+            {
+              "name": "message",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "send whatsapp to {target} saying {message}",
+            "send whatsapp to {target} that {message}",
+            "send a whatsapp to {target} saying {message}",
+            "send a whatsapp message to {target} saying {message}",
+            "send a whatsapp message to {target} that {message}",
+            "send message to {target} saying {message}",
+            "whatsapp {target} saying {message}",
+            "whatsapp {target} that {message}",
+            "tell {target} on whatsapp that {message}",
+            "tell {target} on whatsapp saying {message}"
+          ]
+        },
+        {
+          "name": "OpenAppIntent",
+          "slots": [
+            {
+              "name": "appName",
+              "type": "AppTarget"
+            }
+          ],
+          "samples": [
+            "open {appName}",
+            "launch {appName}",
+            "start {appName}",
+            "open app {appName}",
+            "launch app {appName}",
+            "start app {appName}",
+            "open the {appName} app",
+            "open {appName} on my phone",
+            "launch {appName} on my phone"
+          ]
+        },
+        {
+          "name": "SetVolumeIntent",
+          "slots": [
+            {
+              "name": "mode",
+              "type": "SoundMode"
+            }
+          ],
+          "samples": [
+            "set phone to {mode}",
+            "put phone on {mode}",
+            "put my phone on {mode}",
+            "turn phone to {mode}",
+            "change phone mode to {mode}",
+            "set sound to {mode}",
+            "put phone on silent",
+            "put my phone on silent",
+            "set phone to silent",
+            "put phone on vibrate",
+            "set phone to vibrate",
+            "put phone on normal",
+            "set phone volume to max",
+            "set phone to max volume",
+            "mute my phone",
+            "mute phone"
+          ]
+        },
+        {
+          "name": "SpeakMessageIntent",
+          "slots": [
+            {
+              "name": "message",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "speak on my phone {message}",
+            "say on my phone {message}",
+            "announce on my phone {message}",
+            "broadcast on my phone {message}",
+            "tell my phone {message}",
+            "speak message {message} on phone",
+            "announce message {message} on my phone"
+          ]
+        },
+        {
+          "name": "DeviceStatsIntent",
+          "slots": [],
+          "samples": [
+            "how much storage is left",
+            "check phone storage",
+            "phone storage",
+            "how much storage do I have",
+            "check phone memory",
+            "phone memory status",
+            "check phone specs",
+            "device storage status",
+            "phone storage details",
+            "check phone status"
+          ]
+        },
+        {
+          "name": "SendSmsIntent",
+          "slots": [
+            {
+              "name": "target",
+              "type": "ContactTarget"
+            },
+            {
+              "name": "message",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "send sms to {target} saying {message}",
+            "send sms to {target} that {message}",
+            "send text to {target} saying {message}",
+            "send a text to {target} saying {message}",
+            "text {target} saying {message}",
+            "text {target} that {message}",
+            "send text message to {target} saying {message}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "DeviceState",
+          "values": [
+            {
+              "id": "ON",
+              "name": {
+                "value": "on",
+                "synonyms": ["turn on", "switch on", "enable", "start"]
+              }
+            },
+            {
+              "id": "OFF",
+              "name": {
+                "value": "off",
+                "synonyms": ["turn off", "switch off", "disable", "stop"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "SoundMode",
+          "values": [
+            {
+              "id": "SILENT",
+              "name": {
+                "value": "silent",
+                "synonyms": ["mute", "silence", "quiet"]
+              }
+            },
+            {
+              "id": "VIBRATE",
+              "name": {
+                "value": "vibrate",
+                "synonyms": ["vibration"]
+              }
+            },
+            {
+              "id": "NORMAL",
+              "name": {
+                "value": "normal",
+                "synonyms": ["ring", "regular"]
+              }
+            },
+            {
+              "id": "MAX",
+              "name": {
+                "value": "max",
+                "synonyms": ["maximum", "loud", "full volume", "hundred percent"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AppTarget",
+          "values": [
+            {
+              "id": "YOUTUBE",
+              "name": {
+                "value": "youtube",
+                "synonyms": ["you tube", "video"]
+              }
+            },
+            {
+              "id": "SPOTIFY",
+              "name": {
+                "value": "spotify",
+                "synonyms": ["music", "songs"]
+              }
+            },
+            {
+              "id": "WHATSAPP",
+              "name": {
+                "value": "whatsapp",
+                "synonyms": ["whats app"]
+              }
+            },
+            {
+              "id": "INSTAGRAM",
+              "name": {
+                "value": "instagram",
+                "synonyms": ["insta"]
+              }
+            },
+            {
+              "id": "CAMERA",
+              "name": {
+                "value": "camera"
+              }
+            },
+            {
+              "id": "MAPS",
+              "name": {
+                "value": "maps",
+                "synonyms": ["google maps", "navigation"]
+              }
+            },
+            {
+              "id": "CHROME",
+              "name": {
+                "value": "chrome",
+                "synonyms": ["google chrome", "browser"]
+              }
+            },
+            {
+              "id": "CALCULATOR",
+              "name": {
+                "value": "calculator"
+              }
+            },
+            {
+              "id": "SETTINGS",
+              "name": {
+                "value": "settings"
+              }
+            },
+            {
+              "id": "PHOTOS",
+              "name": {
+                "value": "photos",
+                "synonyms": ["gallery"]
+              }
+            },
+            {
+              "id": "GMAIL",
+              "name": {
+                "value": "gmail",
+                "synonyms": ["email", "mail"]
+              }
+            },
+            {
+              "id": "TWITTER",
+              "name": {
+                "value": "twitter",
+                "synonyms": ["x"]
+              }
+            },
+            {
+              "id": "TELEGRAM",
+              "name": {
+                "value": "telegram"
+              }
+            }
+          ]
+        },
+        {
+          "name": "ContactTarget",
+          "values": [
+            {
+              "id": "MOM",
+              "name": {
+                "value": "mom",
+                "synonyms": ["mummy", "mother", "maa"]
+              }
+            },
+            {
+              "id": "DAD",
+              "name": {
+                "value": "dad",
+                "synonyms": ["papa", "father", "pitaji"]
+              }
+            },
+            {
+              "id": "BROTHER",
+              "name": {
+                "value": "brother",
+                "synonyms": ["bhai", "bro"]
+              }
+            },
+            {
+              "id": "SISTER",
+              "name": {
+                "value": "sister",
+                "synonyms": ["didi", "sis"]
+              }
+            },
+            {
+              "id": "FRIEND",
+              "name": {
+                "value": "friend",
+                "synonyms": ["dost", "buddy"]
+              }
+            },
+            {
+              "id": "WIFE",
+              "name": {
+                "value": "wife"
+              }
+            },
+            {
+              "id": "HUSBAND",
+              "name": {
+                "value": "husband"
+              }
+            },
+            {
+              "id": "BOSS",
+              "name": {
+                "value": "boss",
+                "synonyms": ["manager", "sir"]
+              }
+            },
+            {
+              "id": "HOME",
+              "name": {
+                "value": "home"
+              }
+            },
+            {
+              "id": "OFFICE",
+              "name": {
+                "value": "office",
+                "synonyms": ["work"]
+              }
+            },
+            {
+              "id": "RAHUL",
+              "name": {
+                "value": "rahul"
+              }
+            },
+            {
+              "id": "AMIT",
+              "name": {
+                "value": "amit"
+              }
+            },
+            {
+              "id": "ROHIT",
+              "name": {
+                "value": "rohit"
+              }
+            },
+            {
+              "id": "PRIYA",
+              "name": {
+                "value": "priya"
+              }
+            },
+            {
+              "id": "POOJA",
+              "name": {
+                "value": "pooja"
+              }
+            },
+            {
+              "id": "NEHA",
+              "name": {
+                "value": "neha"
+              }
+            },
+            {
+              "id": "VIKAS",
+              "name": {
+                "value": "vikas"
+              }
+            },
+            {
+              "id": "SURESH",
+              "name": {
+                "value": "suresh"
+              }
+            },
+            {
+              "id": "DEEPAK",
+              "name": {
+                "value": "deepak"
+              }
+            },
+            {
+              "id": "ANKIT",
+              "name": {
+                "value": "ankit"
+              }
+            },
+            {
+              "id": "AJAY",
+              "name": {
+                "value": "ajay"
+              }
+            },
+            {
+              "id": "JOHN",
+              "name": {
+                "value": "john"
+              }
+            },
+            {
+              "id": "ALEX",
+              "name": {
+                "value": "alex"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

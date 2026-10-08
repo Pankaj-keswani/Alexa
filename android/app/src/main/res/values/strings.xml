@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PhoneBridge</string>
+    <string name="app_subtitle">Alexa phone control</string>
+    <string name="channel_name">PhoneBridge Service</string>
+    <string name="channel_description">Maintains connection with Alexa PhoneBridge backend</string>
+    <string name="notification_title">PhoneBridge Active</string>
+    <string name="notification_desc">Listening for incoming calls &amp; Alexa commands</string>
+    <string name="call_channel_name">Incoming Call Alerts</string>
+    <string name="call_channel_description">Shows alerts and quick actions for incoming calls</string>
+</resources>

@@ -1,0 +1,21 @@
+{
+  "name": "phonebridge-backend",
+  "version": "1.0.0",
+  "description": "PhoneBridge Alexa Backend Server with WebSockets and REST APIs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ws": "^8.18.0",
+    "uuid": "^11.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

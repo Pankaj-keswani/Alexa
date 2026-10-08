@@ -1,0 +1,16 @@
+{
+  "name": "phonebridge-alexa-lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda Handler for PhoneBridge Alexa Custom Skill",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-model": "^1.41.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "phonebridge-alexa-skill",
+  "version": "1.0.0",
+  "description": "Amazon Alexa Custom Skill for PhoneBridge",
+  "scripts": {
+    "test": "node --test --test-reporter=spec test/skill.test.js"
+  },
+  "keywords": [
+    "alexa",
+    "alexa-skills-kit",
+    "phonebridge",
+    "telecom"
+  ],
+  "author": "",
+  "license": "MIT"
+}
