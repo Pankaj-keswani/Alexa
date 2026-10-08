@@ -15,7 +15,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_ENABLE_ANNOUNCEMENT = "enable_caller_announcement"
         private const val KEY_DEBUG_LOGGING = "debug_logging"
         private const val KEY_IS_TEST_MODE = "is_test_mode"
-        private const val DEFAULT_BACKEND_URL = "http://10.0.2.2:3000"
+        private const val DEFAULT_BACKEND_URL = "https://alexa-phonebridge.onrender.com"
     }
 
     var backendUrl: String

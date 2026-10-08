@@ -2,7 +2,7 @@ const Alexa = require('ask-sdk-core');
 const https = require('https');
 const http = require('http');
 
-const BACKEND_URL = 'https://uninsured-unrelated-simmering.ngrok-free.dev';
+const BACKEND_URL = 'https://alexa-phonebridge.onrender.com';
 const ALEXA_SECRET = 'alexa_skill_secret_456';
 const TIMEOUT_MS = 6000;
 
