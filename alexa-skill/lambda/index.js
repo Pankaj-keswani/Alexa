@@ -2,8 +2,8 @@ const Alexa = require('ask-sdk-core');
 const https = require('https');
 const http = require('http');
 
-const BACKEND_URL = 'https://alexa-phonebridge.onrender.com';
-const ALEXA_SECRET = 'alexa_skill_secret_456';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://alexa-phonebridge.onrender.com';
+const ALEXA_SECRET = process.env.ALEXA_CLIENT_SECRET || 'alexa_skill_secret_456';
 const TIMEOUT_MS = 6000;
 
 function callBackend(endpoint, method = 'GET', body = null) {
@@ -362,32 +362,28 @@ const SendWhatsAppIntentHandler = {
   },
   async handle(handlerInput) {
     const target = getSlotVal(handlerInput, 'target');
-    const message = getSlotVal(handlerInput, 'message');
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes() || {};
+
+    sessionAttributes.pendingAction = 'WHATSAPP';
 
     if (!target) {
+      attributesManager.setSessionAttributes(sessionAttributes);
       return handlerInput.responseBuilder
         .speak('Who would you like to send a WhatsApp message to?')
-        .reprompt('Please specify the recipient contact name.')
+        .reprompt('Please say the contact name you want to message.')
         .getResponse();
     }
 
-    if (!message) {
-      return handlerInput.responseBuilder
-        .speak(`Please say: send whatsapp to ${target} saying your message.`)
-        .getResponse();
-    }
+    sessionAttributes.pendingTarget = target;
+    attributesManager.setSessionAttributes(sessionAttributes);
 
-    const res = await callBackend('/api/phone/whatsapp', 'POST', { target, message });
-    if (res.ok && res.data && res.data.success) {
-      return handlerInput.responseBuilder
-        .speak(`WhatsApp message sent to ${target}.`)
-        .getResponse();
-    } else {
-      const msg = (res.data && res.data.message) || `I couldn't send the WhatsApp message to ${target}.`;
-      return handlerInput.responseBuilder
-        .speak(msg)
-        .getResponse();
-    }
+    const speechText = 'What message would you like to send to ' + target + '?';
+    const repromptText = 'Please say the message you want to send to ' + target + '.';
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(repromptText)
+      .getResponse();
   }
 };
 
@@ -509,7 +505,7 @@ const DeviceStatsIntentHandler = {
   }
 };
 
-// 12. Direct SMS
+// 12. Direct SMS (Turn 1: Target capture)
 const SendSmsIntentHandler = {
   canHandle(handlerInput) {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -517,31 +513,86 @@ const SendSmsIntentHandler = {
   },
   async handle(handlerInput) {
     const target = getSlotVal(handlerInput, 'target');
-    const message = getSlotVal(handlerInput, 'message');
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes() || {};
+
+    sessionAttributes.pendingAction = 'SMS';
 
     if (!target) {
+      attributesManager.setSessionAttributes(sessionAttributes);
       return handlerInput.responseBuilder
         .speak('Who would you like me to send a text message to?')
-        .reprompt('Please specify the recipient contact name or number.')
+        .reprompt('Please say the contact name or phone number.')
         .getResponse();
     }
+
+    sessionAttributes.pendingTarget = target;
+    attributesManager.setSessionAttributes(sessionAttributes);
+
+    const speechText = 'What message would you like to text ' + target + '?';
+    const repromptText = 'Please say the message you want to text ' + target + '.';
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(repromptText)
+      .getResponse();
+  }
+};
+
+// 13. Dictate Message (Turn 2: Content capture & send for WhatsApp or SMS)
+const DictateMessageIntentHandler = {
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'DictateMessageIntent';
+  },
+  async handle(handlerInput) {
+    const message = getSlotVal(handlerInput, 'message');
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes() || {};
+    const pendingAction = sessionAttributes.pendingAction;
+    const pendingTarget = sessionAttributes.pendingTarget;
 
     if (!message) {
       return handlerInput.responseBuilder
-        .speak(`Please say: send text to ${target} saying your message.`)
+        .speak('I did not catch the message. What would you like to say?')
+        .reprompt('Please say the message you would like to send.')
         .getResponse();
     }
 
-    const res = await callBackend('/api/phone/sms', 'POST', { target, message });
-    if (res.ok && res.data && res.data.success) {
+    if (!pendingTarget) {
       return handlerInput.responseBuilder
-        .speak(`SMS text sent to ${target}.`)
+        .speak('Who would you like me to send that message to, and should I send it via WhatsApp or SMS?')
+        .reprompt('Please say: send WhatsApp to contact name, or send SMS to contact name.')
         .getResponse();
+    }
+
+    // Clear pending session state
+    attributesManager.setSessionAttributes({});
+
+    if (pendingAction === 'SMS') {
+      const res = await callBackend('/api/phone/sms', 'POST', { target: pendingTarget, message: message });
+      if (res.ok && res.data && res.data.success) {
+        return handlerInput.responseBuilder
+          .speak('SMS text sent to ' + pendingTarget + '.')
+          .getResponse();
+      } else {
+        const msg = (res.data && res.data.message) || ('Could not send SMS to ' + pendingTarget + '.');
+        return handlerInput.responseBuilder
+          .speak(msg)
+          .getResponse();
+      }
     } else {
-      const msg = (res.data && res.data.message) || `Could not send SMS to ${target}.`;
-      return handlerInput.responseBuilder
-        .speak(msg)
-        .getResponse();
+      // Default to WhatsApp
+      const res = await callBackend('/api/phone/whatsapp', 'POST', { target: pendingTarget, message: message });
+      if (res.ok && res.data && res.data.success) {
+        return handlerInput.responseBuilder
+          .speak('WhatsApp message sent to ' + pendingTarget + '.')
+          .getResponse();
+      } else {
+        const msg = (res.data && res.data.message) || ("I couldn't send the WhatsApp message to " + pendingTarget + '.');
+        return handlerInput.responseBuilder
+          .speak(msg)
+          .getResponse();
+      }
     }
   }
 };
@@ -580,6 +631,16 @@ const FallbackIntentHandler = {
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.FallbackIntent';
   },
   handle(handlerInput) {
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes() || {};
+    if (sessionAttributes.pendingTarget) {
+      const target = sessionAttributes.pendingTarget;
+      const speechText = "I didn't quite catch that. You can say: saying, followed by your message for " + target + ", or say cancel.";
+      return handlerInput.responseBuilder
+        .speak(speechText)
+        .reprompt('What message should I send to ' + target + '?')
+        .getResponse();
+    }
     const speechText = "I didn't quite catch that. You can ask to find your phone, open an app, check battery or storage, set volume, make a call, or send WhatsApp.";
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -628,6 +689,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     SpeakMessageIntentHandler,
     DeviceStatsIntentHandler,
     SendSmsIntentHandler,
+    DictateMessageIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,

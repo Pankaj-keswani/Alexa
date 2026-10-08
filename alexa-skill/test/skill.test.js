@@ -13,13 +13,23 @@ let mockBackendState = {
 let mockServer;
 const MOCK_PORT = 3099;
 
-function buildAlexaRequest(intentName, requestType = 'IntentRequest') {
+function buildAlexaRequest(intentName, requestType = 'IntentRequest', slots = {}, sessionAttributes = {}) {
+  const formattedSlots = {};
+  for (const [key, val] of Object.entries(slots)) {
+    formattedSlots[key] = {
+      name: key,
+      value: val,
+      confirmationStatus: 'NONE'
+    };
+  }
+
   return {
     version: '1.0',
     session: {
-      new: true,
+      new: Object.keys(sessionAttributes).length === 0,
       sessionId: 'amzn1.echo-api.session.test-session',
       application: { applicationId: 'amzn1.ask.skill.test' },
+      attributes: sessionAttributes,
       user: { userId: 'amzn1.ask.account.test' }
     },
     request: requestType === 'LaunchRequest' ? {
@@ -34,7 +44,8 @@ function buildAlexaRequest(intentName, requestType = 'IntentRequest') {
       locale: 'en-IN',
       intent: {
         name: intentName,
-        confirmationStatus: 'NONE'
+        confirmationStatus: 'NONE',
+        slots: formattedSlots
       }
     }
   };
@@ -66,6 +77,14 @@ test.before(async () => {
         return res.end(JSON.stringify({ success: true, message: 'Call rejected' }));
       }
       return res.end(JSON.stringify({ success: false, reason: 'NO_INCOMING_CALL' }));
+    }
+
+    if (req.url === '/api/phone/whatsapp' && req.method === 'POST') {
+      return res.end(JSON.stringify({ success: true, message: 'WhatsApp message sent' }));
+    }
+
+    if (req.url === '/api/phone/sms' && req.method === 'POST') {
+      return res.end(JSON.stringify({ success: true, message: 'SMS message sent' }));
     }
 
     res.statusCode = 404;
@@ -121,7 +140,7 @@ test('Alexa Skill - AnswerCallIntent when call is ringing', async () => {
   });
 
   const speech = response.response.outputSpeech.ssml;
-  assert.match(speech, /Okay, I answered the call/);
+  assert.match(speech, /Call answered on speakerphone/);
 });
 
 test('Alexa Skill - RejectCallIntent when call is ringing', async () => {
@@ -135,7 +154,7 @@ test('Alexa Skill - RejectCallIntent when call is ringing', async () => {
   });
 
   const speech = response.response.outputSpeech.ssml;
-  assert.match(speech, /Okay, I rejected the call/);
+  assert.match(speech, /Call rejected/);
 });
 
 test('Alexa Skill - AnswerCallIntent when no call to answer', async () => {
@@ -163,5 +182,76 @@ test('Alexa Skill - LaunchRequest greeting', async () => {
   });
 
   const speech = response.response.outputSpeech.ssml;
-  assert.match(speech, /Welcome to Phone Bridge/);
+  assert.match(speech, /Mobile Buddy is online/);
 });
+
+test('Alexa Skill - SendWhatsAppIntent captures target and reprompts for message', async () => {
+  const { handler } = require('../lambda/index');
+  const req = buildAlexaRequest('SendWhatsAppIntent', 'IntentRequest', { target: 'Rahul' });
+
+  const response = await new Promise((resolve, reject) => {
+    handler(req, {}, (err, res) => {
+      if (err) reject(err); else resolve(res);
+    });
+  });
+
+  const speech = response.response.outputSpeech.ssml;
+  assert.match(speech, /What message would you like to send to Rahul\?/);
+  assert.equal(response.sessionAttributes.pendingAction, 'WHATSAPP');
+  assert.equal(response.sessionAttributes.pendingTarget, 'Rahul');
+});
+
+test('Alexa Skill - DictateMessageIntent sends WhatsApp when pendingAction is WHATSAPP', async () => {
+  const { handler } = require('../lambda/index');
+  const req = buildAlexaRequest(
+    'DictateMessageIntent',
+    'IntentRequest',
+    { message: 'I am on my way' },
+    { pendingAction: 'WHATSAPP', pendingTarget: 'Rahul' }
+  );
+
+  const response = await new Promise((resolve, reject) => {
+    handler(req, {}, (err, res) => {
+      if (err) reject(err); else resolve(res);
+    });
+  });
+
+  const speech = response.response.outputSpeech.ssml;
+  assert.match(speech, /WhatsApp message sent to Rahul\./);
+});
+
+test('Alexa Skill - SendSmsIntent captures target and reprompts for message', async () => {
+  const { handler } = require('../lambda/index');
+  const req = buildAlexaRequest('SendSmsIntent', 'IntentRequest', { target: 'Papa' });
+
+  const response = await new Promise((resolve, reject) => {
+    handler(req, {}, (err, res) => {
+      if (err) reject(err); else resolve(res);
+    });
+  });
+
+  const speech = response.response.outputSpeech.ssml;
+  assert.match(speech, /What message would you like to text Papa\?/);
+  assert.equal(response.sessionAttributes.pendingAction, 'SMS');
+  assert.equal(response.sessionAttributes.pendingTarget, 'Papa');
+});
+
+test('Alexa Skill - DictateMessageIntent sends SMS when pendingAction is SMS', async () => {
+  const { handler } = require('../lambda/index');
+  const req = buildAlexaRequest(
+    'DictateMessageIntent',
+    'IntentRequest',
+    { message: 'Call me back' },
+    { pendingAction: 'SMS', pendingTarget: 'Papa' }
+  );
+
+  const response = await new Promise((resolve, reject) => {
+    handler(req, {}, (err, res) => {
+      if (err) reject(err); else resolve(res);
+    });
+  });
+
+  const speech = response.response.outputSpeech.ssml;
+  assert.match(speech, /SMS text sent to Papa\./);
+});
+
