@@ -182,7 +182,7 @@ test('Alexa Skill - LaunchRequest greeting', async () => {
   });
 
   const speech = response.response.outputSpeech.ssml;
-  assert.match(speech, /Mobile Buddy is online/);
+  assert.match(speech, /My Jarvis is online/);
 });
 
 test('Alexa Skill - SendWhatsAppIntent captures target and reprompts for message', async () => {

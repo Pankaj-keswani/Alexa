@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "mobile buddy",
+      "invocationName": "my jarvis",
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
@@ -16,7 +16,7 @@
           "samples": [
             "help",
             "what can you do",
-            "how do I use mobile buddy",
+            "how do I use my jarvis",
             "what commands can I say"
           ]
         },

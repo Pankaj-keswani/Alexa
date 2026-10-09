@@ -87,7 +87,7 @@ function getSlotVal(handlerInput, slotName) {
 function formatDeviceError(rawMsg, fallback) {
   const msg = rawMsg || fallback;
   if (msg && msg.indexOf('No Android phone') !== -1) {
-    return 'Your phone is currently disconnected from Mobile Buddy. Please open the Phone Bridge app on your phone.';
+    return 'Your phone is currently disconnected from My Jarvis. Please open the Phone Bridge app on your phone.';
   }
   return msg;
 }
@@ -101,7 +101,7 @@ const LaunchRequestHandler = {
     const statusRes = await callBackend('/api/call/status', 'GET');
 
     if (statusRes.ok && statusRes.data && statusRes.data.connectedDevices === 0) {
-      const speechText = 'Mobile Buddy is online, but your Android phone is not connected. Please open the Phone Bridge app on your phone.';
+      const speechText = 'My Jarvis is online, but your Android phone is not connected. Please open the Phone Bridge app on your phone.';
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt('Would you like to try checking again?')
@@ -117,7 +117,7 @@ const LaunchRequestHandler = {
         .getResponse();
     }
 
-    const speechText = 'Mobile Buddy is online and your phone is connected. You can find your phone, check battery or storage, control flashlight, adjust volume, launch apps, announce a message, or make calls. What can I do for you?';
+    const speechText = 'My Jarvis is online and your phone is connected. You can find your phone, check battery or storage, control flashlight, adjust volume, launch apps, announce a message, or make calls. What can I do for you?';
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt('How can I help with your phone?')
@@ -142,7 +142,7 @@ const GetCallerIntentHandler = {
 
     if (statusRes.data.connectedDevices === 0) {
       return handlerInput.responseBuilder
-        .speak('Your phone is currently disconnected from Mobile Buddy. Please open the Phone Bridge app on your phone.')
+        .speak('Your phone is currently disconnected from My Jarvis. Please open the Phone Bridge app on your phone.')
         .getResponse();
     }
 
@@ -231,7 +231,7 @@ const CallStatusIntentHandler = {
 
     if (statusRes.data.connectedDevices === 0) {
       return handlerInput.responseBuilder
-        .speak('Your phone is currently disconnected from Mobile Buddy. Please open the Phone Bridge app on your phone.')
+        .speak('Your phone is currently disconnected from My Jarvis. Please open the Phone Bridge app on your phone.')
         .getResponse();
     }
 
