@@ -84,14 +84,6 @@ function getSlotVal(handlerInput, slotName) {
   }
 }
 
-function formatDeviceError(rawMsg, fallback) {
-  const msg = rawMsg || fallback;
-  if (msg && msg.indexOf('No Android phone') !== -1) {
-    return 'Your phone is currently disconnected from My Jarvis. Please open the Phone Bridge app on your phone.';
-  }
-  return msg;
-}
-
 // 1. Launch Request
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -99,14 +91,6 @@ const LaunchRequestHandler = {
   },
   async handle(handlerInput) {
     const statusRes = await callBackend('/api/call/status', 'GET');
-
-    if (statusRes.ok && statusRes.data && statusRes.data.connectedDevices === 0) {
-      const speechText = 'My Jarvis is online, but your Android phone is not connected. Please open the Phone Bridge app on your phone.';
-      return handlerInput.responseBuilder
-        .speak(speechText)
-        .reprompt('Would you like to try checking again?')
-        .getResponse();
-    }
 
     if (statusRes.ok && statusRes.data && statusRes.data.hasActiveCall && statusRes.data.state === 'RINGING') {
       const caller = statusRes.data.callerName || 'Unknown caller';
@@ -117,7 +101,7 @@ const LaunchRequestHandler = {
         .getResponse();
     }
 
-    const speechText = 'My Jarvis is online and your phone is connected. You can find your phone, check battery or storage, control flashlight, adjust volume, launch apps, announce a message, or make calls. What can I do for you?';
+    const speechText = 'My Jarvis is online. You can find your phone, check battery or storage, control flashlight, adjust volume, launch apps, announce a message, or make calls. What can I do for you?';
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt('How can I help with your phone?')
@@ -137,12 +121,6 @@ const GetCallerIntentHandler = {
     if (!statusRes.ok || !statusRes.data) {
       return handlerInput.responseBuilder
         .speak('I was unable to connect to your phone backend. Please make sure the app and backend are running.')
-        .getResponse();
-    }
-
-    if (statusRes.data.connectedDevices === 0) {
-      return handlerInput.responseBuilder
-        .speak('Your phone is currently disconnected from My Jarvis. Please open the Phone Bridge app on your phone.')
         .getResponse();
     }
 
@@ -229,17 +207,11 @@ const CallStatusIntentHandler = {
         .getResponse();
     }
 
-    if (statusRes.data.connectedDevices === 0) {
-      return handlerInput.responseBuilder
-        .speak('Your phone is currently disconnected from My Jarvis. Please open the Phone Bridge app on your phone.')
-        .getResponse();
-    }
-
     const { hasActiveCall, state, callerName } = statusRes.data;
 
     if (!hasActiveCall || state === 'IDLE') {
       return handlerInput.responseBuilder
-        .speak('Your phone is connected, and there is no active call right now.')
+        .speak('There is no active call on your phone right now.')
         .getResponse();
     }
 
@@ -273,9 +245,8 @@ const FindPhoneIntentHandler = {
         .speak('Sounding the alarm on your phone now.')
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, 'Please ensure your phone app is open and connected.');
       return handlerInput.responseBuilder
-        .speak(`I couldn't trigger the phone alarm. ${msg}`)
+        .speak("I couldn't trigger the phone alarm right now.")
         .getResponse();
     }
   }
@@ -293,9 +264,8 @@ const StopFindPhoneIntentHandler = {
         .speak('Phone alarm stopped.')
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, 'I could not stop the phone alarm.');
       return handlerInput.responseBuilder
-        .speak(msg)
+        .speak('I could not stop the phone alarm.')
         .getResponse();
     }
   }
@@ -320,9 +290,8 @@ const BatteryStatusIntentHandler = {
         .speak(speech)
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, 'Could not query phone battery.');
       return handlerInput.responseBuilder
-        .speak(`I was unable to check your battery. ${msg}`)
+        .speak('I was unable to check your battery right now.')
         .getResponse();
     }
   }
@@ -346,9 +315,8 @@ const FlashlightIntentHandler = {
         .speak(text)
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, 'Please check your phone app.');
       return handlerInput.responseBuilder
-        .speak(`I couldn't change the flashlight state. ${msg}`)
+        .speak("I couldn't change the flashlight state.")
         .getResponse();
     }
   }
@@ -375,9 +343,8 @@ const MakeCallIntentHandler = {
         .speak(`Calling ${target} on speakerphone.`)
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, `I couldn't place the call to ${target}.`);
       return handlerInput.responseBuilder
-        .speak(msg)
+        .speak(`I couldn't place the call to ${target}.`)
         .getResponse();
     }
   }
@@ -437,9 +404,8 @@ const OpenAppIntentHandler = {
         .speak(`Opening ${appName} on your phone.`)
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, `Could not open ${appName}.`);
       return handlerInput.responseBuilder
-        .speak(msg)
+        .speak(`Could not open ${appName}.`)
         .getResponse();
     }
   }
@@ -471,9 +437,8 @@ const SetVolumeIntentHandler = {
         .speak(text)
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, 'Could not adjust phone sound mode.');
       return handlerInput.responseBuilder
-        .speak(msg)
+        .speak('Could not adjust phone sound mode.')
         .getResponse();
     }
   }
@@ -500,9 +465,8 @@ const SpeakMessageIntentHandler = {
         .speak('Broadcasting message on your phone.')
         .getResponse();
     } else {
-      const msg = formatDeviceError((res.data && (res.data.statusText || res.data.message)), 'Could not broadcast message to phone.');
       return handlerInput.responseBuilder
-        .speak(msg)
+        .speak('Could not broadcast message to phone.')
         .getResponse();
     }
   }
@@ -526,9 +490,8 @@ const DeviceStatsIntentHandler = {
         .speak(speech)
         .getResponse();
     } else {
-      const msg = formatDeviceError(res.data && res.data.message, 'Could not query storage details from phone.');
       return handlerInput.responseBuilder
-        .speak(msg)
+        .speak('Could not query storage details from phone.')
         .getResponse();
     }
   }
@@ -604,9 +567,8 @@ const DictateMessageIntentHandler = {
           .speak('SMS text sent to ' + pendingTarget + '.')
           .getResponse();
       } else {
-        const msg = formatDeviceError(res.data && res.data.message, 'Could not send SMS to ' + pendingTarget + '.');
         return handlerInput.responseBuilder
-          .speak(msg)
+          .speak('Could not send SMS to ' + pendingTarget + '.')
           .getResponse();
       }
     } else {
@@ -617,9 +579,8 @@ const DictateMessageIntentHandler = {
           .speak('WhatsApp message sent to ' + pendingTarget + '.')
           .getResponse();
       } else {
-        const msg = formatDeviceError(res.data && res.data.message, "I couldn't send the WhatsApp message to " + pendingTarget + '.');
         return handlerInput.responseBuilder
-          .speak(msg)
+          .speak("I couldn't send the WhatsApp message to " + pendingTarget + '.')
           .getResponse();
       }
     }
