@@ -16,7 +16,8 @@
           "samples": [
             "help",
             "what can you do",
-            "how do I use phone bridge"
+            "how do I use mobile buddy",
+            "what commands can I say"
           ]
         },
         {
@@ -49,7 +50,8 @@
             "who is ringing",
             "who is calling on my phone",
             "caller details",
-            "tell me the caller"
+            "tell me the caller",
+            "caller id"
           ]
         },
         {
@@ -95,9 +97,565 @@
             "is my phone ringing",
             "call status"
           ]
+        },
+        {
+          "name": "FindPhoneIntent",
+          "slots": [],
+          "samples": [
+            "find my phone",
+            "where is my phone",
+            "ring my phone",
+            "locate my phone",
+            "ring phone",
+            "make my phone ring",
+            "find phone",
+            "trigger siren",
+            "start phone alarm",
+            "ring my mobile",
+            "find my mobile"
+          ]
+        },
+        {
+          "name": "StopFindPhoneIntent",
+          "slots": [],
+          "samples": [
+            "stop finding my phone",
+            "stop ringing my phone",
+            "stop the siren",
+            "silence my phone",
+            "stop ringing",
+            "stop alarm",
+            "stop phone alarm",
+            "found my phone",
+            "i found my phone",
+            "stop finding phone",
+            "stop phone ringing"
+          ]
+        },
+        {
+          "name": "BatteryStatusIntent",
+          "slots": [],
+          "samples": [
+            "what is my battery level",
+            "what's my battery level",
+            "check my battery",
+            "what is my phone battery",
+            "what's my phone battery",
+            "how much battery is left",
+            "phone battery status",
+            "phone battery",
+            "battery level",
+            "check phone battery",
+            "battery status",
+            "how much charge does my phone have",
+            "is my phone charging",
+            "battery percentage"
+          ]
+        },
+        {
+          "name": "FlashlightIntent",
+          "slots": [
+            {
+              "name": "state",
+              "type": "DeviceState"
+            }
+          ],
+          "samples": [
+            "turn {state} the flashlight",
+            "turn {state} flashlight",
+            "turn {state} the torch",
+            "turn {state} torch",
+            "turn {state} my phone light",
+            "turn {state} phone light",
+            "flashlight {state}",
+            "torch {state}",
+            "turn on flashlight",
+            "turn off flashlight",
+            "turn on torch",
+            "turn off torch",
+            "turn on the flashlight",
+            "turn off the flashlight",
+            "turn on the torch",
+            "turn off the torch"
+          ]
+        },
+        {
+          "name": "MakeCallIntent",
+          "slots": [
+            {
+              "name": "target",
+              "type": "ContactTarget"
+            }
+          ],
+          "samples": [
+            "call {target}",
+            "dial {target}",
+            "phone {target}",
+            "call {target} on speaker",
+            "call {target} on speakerphone",
+            "make a call to {target}",
+            "place a call to {target}",
+            "dial number {target}",
+            "please call {target}",
+            "call to {target}"
+          ]
+        },
+        {
+          "name": "SendWhatsAppIntent",
+          "slots": [
+            {
+              "name": "target",
+              "type": "ContactTarget"
+            }
+          ],
+          "samples": [
+            "send whatsapp to {target}",
+            "send whatsapp {target}",
+            "send a whatsapp to {target}",
+            "send a whatsapp message to {target}",
+            "send whatsapp message to {target}",
+            "send a message to {target} on whatsapp",
+            "send message to {target} on whatsapp",
+            "whatsapp {target}",
+            "whatsapp message to {target}",
+            "message {target} on whatsapp",
+            "send whatsapp",
+            "send a whatsapp",
+            "send a whatsapp message",
+            "whatsapp someone"
+          ]
+        },
+        {
+          "name": "OpenAppIntent",
+          "slots": [
+            {
+              "name": "appName",
+              "type": "AppTarget"
+            }
+          ],
+          "samples": [
+            "open {appName}",
+            "launch {appName}",
+            "start {appName}",
+            "open app {appName}",
+            "launch app {appName}",
+            "start app {appName}",
+            "open the {appName} app",
+            "open {appName} on my phone",
+            "launch {appName} on my phone"
+          ]
+        },
+        {
+          "name": "SetVolumeIntent",
+          "slots": [
+            {
+              "name": "mode",
+              "type": "SoundMode"
+            }
+          ],
+          "samples": [
+            "set phone to {mode}",
+            "put phone on {mode}",
+            "put my phone on {mode}",
+            "turn phone to {mode}",
+            "change phone mode to {mode}",
+            "set sound to {mode}",
+            "put phone on silent",
+            "put my phone on silent",
+            "set phone to silent",
+            "put phone on vibrate",
+            "set phone to vibrate",
+            "put phone on normal",
+            "set phone volume to max",
+            "set phone to max volume",
+            "mute my phone",
+            "mute phone"
+          ]
+        },
+        {
+          "name": "SpeakMessageIntent",
+          "slots": [
+            {
+              "name": "message",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "speak on my phone {message}",
+            "say on my phone {message}",
+            "announce on my phone {message}",
+            "broadcast on my phone {message}",
+            "tell my phone {message}",
+            "speak message {message} on phone",
+            "announce message {message} on my phone"
+          ]
+        },
+        {
+          "name": "DeviceStatsIntent",
+          "slots": [],
+          "samples": [
+            "how much storage is left",
+            "check phone storage",
+            "phone storage",
+            "how much storage do I have",
+            "check phone memory",
+            "phone memory status",
+            "check phone specs",
+            "device storage status",
+            "phone storage details",
+            "check phone status"
+          ]
+        },
+        {
+          "name": "SendSmsIntent",
+          "slots": [
+            {
+              "name": "target",
+              "type": "ContactTarget"
+            }
+          ],
+          "samples": [
+            "send sms to {target}",
+            "send a sms to {target}",
+            "send an sms to {target}",
+            "send sms message to {target}",
+            "send text to {target}",
+            "send a text to {target}",
+            "send a text message to {target}",
+            "send text message to {target}",
+            "text {target}",
+            "sms {target}",
+            "send sms",
+            "send an sms",
+            "send a text",
+            "send text",
+            "text someone"
+          ]
+        },
+        {
+          "name": "DictateMessageIntent",
+          "slots": [
+            {
+              "name": "message",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "saying {message}",
+            "that {message}",
+            "tell them {message}",
+            "tell him {message}",
+            "tell her {message}",
+            "send {message}",
+            "the message is {message}",
+            "my message is {message}",
+            "message is {message}",
+            "say {message}",
+            "just say {message}",
+            "it is {message}",
+            "please send {message}",
+            "please say {message}",
+            "write {message}",
+            "message {message}"
+          ]
         }
       ],
-      "types": []
+      "types": [
+        {
+          "name": "DeviceState",
+          "values": [
+            {
+              "id": "ON",
+              "name": {
+                "value": "on",
+                "synonyms": ["turn on", "switch on", "enable", "start"]
+              }
+            },
+            {
+              "id": "OFF",
+              "name": {
+                "value": "off",
+                "synonyms": ["turn off", "switch off", "disable", "stop"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "SoundMode",
+          "values": [
+            {
+              "id": "SILENT",
+              "name": {
+                "value": "silent",
+                "synonyms": ["mute", "silence", "quiet"]
+              }
+            },
+            {
+              "id": "VIBRATE",
+              "name": {
+                "value": "vibrate",
+                "synonyms": ["vibration"]
+              }
+            },
+            {
+              "id": "NORMAL",
+              "name": {
+                "value": "normal",
+                "synonyms": ["ring", "regular"]
+              }
+            },
+            {
+              "id": "MAX",
+              "name": {
+                "value": "max",
+                "synonyms": ["maximum", "loud", "full volume", "hundred percent"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AppTarget",
+          "values": [
+            {
+              "id": "YOUTUBE",
+              "name": {
+                "value": "youtube",
+                "synonyms": ["you tube", "video"]
+              }
+            },
+            {
+              "id": "SPOTIFY",
+              "name": {
+                "value": "spotify",
+                "synonyms": ["music", "songs"]
+              }
+            },
+            {
+              "id": "WHATSAPP",
+              "name": {
+                "value": "whatsapp",
+                "synonyms": ["whats app"]
+              }
+            },
+            {
+              "id": "INSTAGRAM",
+              "name": {
+                "value": "instagram",
+                "synonyms": ["insta"]
+              }
+            },
+            {
+              "id": "CAMERA",
+              "name": {
+                "value": "camera"
+              }
+            },
+            {
+              "id": "MAPS",
+              "name": {
+                "value": "maps",
+                "synonyms": ["google maps", "navigation"]
+              }
+            },
+            {
+              "id": "CHROME",
+              "name": {
+                "value": "chrome",
+                "synonyms": ["google chrome", "browser"]
+              }
+            },
+            {
+              "id": "CALCULATOR",
+              "name": {
+                "value": "calculator"
+              }
+            },
+            {
+              "id": "SETTINGS",
+              "name": {
+                "value": "settings"
+              }
+            },
+            {
+              "id": "PHOTOS",
+              "name": {
+                "value": "photos",
+                "synonyms": ["gallery"]
+              }
+            },
+            {
+              "id": "GMAIL",
+              "name": {
+                "value": "gmail",
+                "synonyms": ["email", "mail"]
+              }
+            },
+            {
+              "id": "TWITTER",
+              "name": {
+                "value": "twitter",
+                "synonyms": ["x"]
+              }
+            },
+            {
+              "id": "TELEGRAM",
+              "name": {
+                "value": "telegram"
+              }
+            }
+          ]
+        },
+        {
+          "name": "ContactTarget",
+          "values": [
+            {
+              "id": "MOM",
+              "name": {
+                "value": "mom",
+                "synonyms": ["mummy", "mother", "maa"]
+              }
+            },
+            {
+              "id": "DAD",
+              "name": {
+                "value": "dad",
+                "synonyms": ["papa", "father", "pitaji"]
+              }
+            },
+            {
+              "id": "BROTHER",
+              "name": {
+                "value": "brother",
+                "synonyms": ["bhai", "bro"]
+              }
+            },
+            {
+              "id": "SISTER",
+              "name": {
+                "value": "sister",
+                "synonyms": ["didi", "sis"]
+              }
+            },
+            {
+              "id": "FRIEND",
+              "name": {
+                "value": "friend",
+                "synonyms": ["dost", "buddy"]
+              }
+            },
+            {
+              "id": "WIFE",
+              "name": {
+                "value": "wife"
+              }
+            },
+            {
+              "id": "HUSBAND",
+              "name": {
+                "value": "husband"
+              }
+            },
+            {
+              "id": "BOSS",
+              "name": {
+                "value": "boss",
+                "synonyms": ["manager", "sir"]
+              }
+            },
+            {
+              "id": "HOME",
+              "name": {
+                "value": "home"
+              }
+            },
+            {
+              "id": "OFFICE",
+              "name": {
+                "value": "office",
+                "synonyms": ["work"]
+              }
+            },
+            {
+              "id": "RAHUL",
+              "name": {
+                "value": "rahul"
+              }
+            },
+            {
+              "id": "AMIT",
+              "name": {
+                "value": "amit"
+              }
+            },
+            {
+              "id": "ROHIT",
+              "name": {
+                "value": "rohit"
+              }
+            },
+            {
+              "id": "PRIYA",
+              "name": {
+                "value": "priya"
+              }
+            },
+            {
+              "id": "POOJA",
+              "name": {
+                "value": "pooja"
+              }
+            },
+            {
+              "id": "NEHA",
+              "name": {
+                "value": "neha"
+              }
+            },
+            {
+              "id": "VIKAS",
+              "name": {
+                "value": "vikas"
+              }
+            },
+            {
+              "id": "SURESH",
+              "name": {
+                "value": "suresh"
+              }
+            },
+            {
+              "id": "DEEPAK",
+              "name": {
+                "value": "deepak"
+              }
+            },
+            {
+              "id": "ANKIT",
+              "name": {
+                "value": "ankit"
+              }
+            },
+            {
+              "id": "AJAY",
+              "name": {
+                "value": "ajay"
+              }
+            },
+            {
+              "id": "JOHN",
+              "name": {
+                "value": "john"
+              }
+            },
+            {
+              "id": "ALEX",
+              "name": {
+                "value": "alex"
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }

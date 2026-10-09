@@ -12,7 +12,8 @@ const router = express.Router();
  */
 router.get('/status', authenticateAlexaOrDevice, (req, res) => {
   const status = callStateManager.getCallStatus();
-  logger.alexa(`Call status queried by ${req.callerRole}: state=${status.state}, caller=${status.callerName || 'None'}`);
+  const connectedDevices = websocketService.getConnectedDeviceCount();
+  logger.alexa(`Call status queried by ${req.callerRole}: state=${status.state}, caller=${status.callerName || 'None'}, connectedDevices=${connectedDevices}`);
 
   res.json({
     success: true,
@@ -20,7 +21,8 @@ router.get('/status', authenticateAlexaOrDevice, (req, res) => {
     state: status.state,
     callerName: status.callerName,
     phoneNumber: status.phoneNumber,
-    timestamp: status.updatedAt
+    timestamp: status.updatedAt,
+    connectedDevices: connectedDevices
   });
 });
 
