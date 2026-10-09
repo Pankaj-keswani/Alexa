@@ -15,6 +15,9 @@ class PreferencesManager(context: Context) {
         private const val KEY_ENABLE_ANNOUNCEMENT = "enable_caller_announcement"
         private const val KEY_DEBUG_LOGGING = "debug_logging"
         private const val KEY_IS_TEST_MODE = "is_test_mode"
+        private const val KEY_IS_BRIDGE_ENABLED = "is_bridge_enabled"
+        private const val KEY_IS_ECO_MODE = "is_eco_mode"
+        private const val KEY_PING_INTERVAL = "ping_interval_seconds"
         private const val DEFAULT_BACKEND_URL = "https://alexa-phonebridge.onrender.com"
     }
 
@@ -52,4 +55,16 @@ class PreferencesManager(context: Context) {
     var isTestMode: Boolean
         get() = prefs.getBoolean(KEY_IS_TEST_MODE, false)
         set(value) = prefs.edit().putBoolean(KEY_IS_TEST_MODE, value).apply()
+
+    var isBridgeEnabled: Boolean
+        get() = prefs.getBoolean(KEY_IS_BRIDGE_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_IS_BRIDGE_ENABLED, value).apply()
+
+    var isEcoMode: Boolean
+        get() = prefs.getBoolean(KEY_IS_ECO_MODE, false)
+        set(value) = prefs.edit().putBoolean(KEY_IS_ECO_MODE, value).apply()
+
+    var pingIntervalSeconds: Int
+        get() = prefs.getInt(KEY_PING_INTERVAL, 60)
+        set(value) = prefs.edit().putInt(KEY_PING_INTERVAL, value.coerceIn(30, 300)).apply()
 }

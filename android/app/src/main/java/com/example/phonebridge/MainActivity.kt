@@ -22,7 +22,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.compose.material.icons.filled.Tune
 import com.example.phonebridge.service.PhoneBridgeForegroundService
+import com.example.phonebridge.ui.screens.ControlCenterScreen
 import com.example.phonebridge.ui.screens.LogsScreen
 import com.example.phonebridge.ui.screens.MainDashboardScreen
 import com.example.phonebridge.ui.screens.SettingsScreen
@@ -58,6 +60,10 @@ class MainActivity : ComponentActivity() {
                 var selectedTab by remember { mutableIntStateOf(0) }
 
                 val isBackendConnected by viewModel.isBackendConnected.collectAsState()
+                val isBridgeActive by viewModel.isBridgeActive.collectAsState()
+                val isEcoMode by viewModel.isEcoMode.collectAsState()
+                val pingIntervalSeconds by viewModel.pingIntervalSeconds.collectAsState()
+                val networkType by viewModel.networkType.collectAsState()
                 val isAlexaConfigured by viewModel.isAlexaConfigured.collectAsState()
                 val callState by viewModel.callState.collectAsState()
                 val callerName by viewModel.callerName.collectAsState()
@@ -65,6 +71,18 @@ class MainActivity : ComponentActivity() {
                 val isDefaultDialer by viewModel.isDefaultDialer.collectAsState()
                 val statusMessage by viewModel.statusMessage.collectAsState()
                 val logs by viewModel.logs.collectAsState()
+
+                // Interactive control states
+                val isFlashlightOn by viewModel.isFlashlightOn.collectAsState()
+                val isAlarmPlaying by viewModel.isAlarmPlaying.collectAsState()
+                val batteryLevel by viewModel.batteryLevel.collectAsState()
+                val isBatteryCharging by viewModel.isBatteryCharging.collectAsState()
+                val freeStorageGb by viewModel.freeStorageGb.collectAsState()
+                val totalStorageGb by viewModel.totalStorageGb.collectAsState()
+                val freeRamGb by viewModel.freeRamGb.collectAsState()
+                val totalRamGb by viewModel.totalRamGb.collectAsState()
+                val soundMode by viewModel.soundMode.collectAsState()
+                val volumeLevel by viewModel.volumeLevel.collectAsState()
 
                 val backendUrl by viewModel.backendUrl.collectAsState()
                 val deviceToken by viewModel.deviceToken.collectAsState()
@@ -97,8 +115,8 @@ class MainActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = selectedTab == 1,
                                 onClick = { selectedTab = 1 },
-                                icon = { Icon(Icons.Default.Build, contentDescription = "Test Mode") },
-                                label = { Text("Test Mode") },
+                                icon = { Icon(Icons.Default.Tune, contentDescription = "Controls") },
+                                label = { Text("Controls") },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = Color.Black,
                                     selectedTextColor = CyanPrimary,
@@ -110,8 +128,8 @@ class MainActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = selectedTab == 2,
                                 onClick = { selectedTab = 2 },
-                                icon = { Icon(Icons.Default.List, contentDescription = "Logs") },
-                                label = { Text("Logs") },
+                                icon = { Icon(Icons.Default.Build, contentDescription = "Simulator") },
+                                label = { Text("Simulator") },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = Color.Black,
                                     selectedTextColor = CyanPrimary,
@@ -123,6 +141,19 @@ class MainActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = selectedTab == 3,
                                 onClick = { selectedTab = 3 },
+                                icon = { Icon(Icons.Default.List, contentDescription = "Logs") },
+                                label = { Text("Logs") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color.Black,
+                                    selectedTextColor = CyanPrimary,
+                                    indicatorColor = CyanPrimary,
+                                    unselectedIconColor = TextSecondary,
+                                    unselectedTextColor = TextSecondary
+                                )
+                            )
+                            NavigationBarItem(
+                                selected = selectedTab == 4,
+                                onClick = { selectedTab = 4 },
                                 icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
                                 label = { Text("Settings") },
                                 colors = NavigationBarItemDefaults.colors(
@@ -155,9 +186,34 @@ class MainActivity : ComponentActivity() {
                                 onTestCallState = { viewModel.testCallState() },
                                 onRequestPhoneRole = { requestPhoneDialerRole() },
                                 onQuickSimulateCall = { viewModel.simulateIncomingCall("Rahul", "+919876543210") },
-                                onNavigateToTest = { selectedTab = 1 }
+                                onNavigateToControls = { selectedTab = 1 },
+                                onNavigateToTest = { selectedTab = 2 }
                             )
-                            1 -> TestSimulationScreen(
+                            1 -> ControlCenterScreen(
+                                isBridgeActive = isBridgeActive,
+                                isEcoMode = isEcoMode,
+                                networkType = networkType,
+                                batteryLevel = batteryLevel,
+                                isCharging = isBatteryCharging,
+                                freeStorageGb = freeStorageGb,
+                                totalStorageGb = totalStorageGb,
+                                freeRamGb = freeRamGb,
+                                totalRamGb = totalRamGb,
+                                isFlashlightOn = isFlashlightOn,
+                                isAlarmPlaying = isAlarmPlaying,
+                                soundMode = soundMode,
+                                volumeLevel = volumeLevel,
+                                onToggleBridge = { viewModel.toggleBridge(it) },
+                                onToggleEcoMode = { viewModel.toggleEcoMode(it) },
+                                onToggleFlashlight = { viewModel.toggleFlashlight() },
+                                onToggleAlarm = { viewModel.toggleAlarm() },
+                                onSetSoundProfile = { viewModel.setSoundProfile(it) },
+                                onSetVolume = { viewModel.setVolumePercent(it) },
+                                onSpeakTts = { viewModel.speakTts(it) },
+                                onOpenApp = { viewModel.openAppDirect(it) },
+                                onRefreshStats = { viewModel.refreshDeviceStats() }
+                            )
+                            2 -> TestSimulationScreen(
                                 currentCallState = callState,
                                 currentCaller = callerName,
                                 onSimulateIncoming = { name, num -> viewModel.simulateIncomingCall(name, num) },
@@ -165,11 +221,11 @@ class MainActivity : ComponentActivity() {
                                 onSimulateReject = { viewModel.simulateRejectCall() },
                                 onSimulateEndCall = { viewModel.simulateEndCall() }
                             )
-                            2 -> LogsScreen(
+                            3 -> LogsScreen(
                                 logs = logs,
                                 onClearLogs = { viewModel.clearLogs() }
                             )
-                            3 -> SettingsScreen(
+                            4 -> SettingsScreen(
                                 currentUrl = backendUrl,
                                 currentToken = deviceToken,
                                 currentDeviceId = deviceId,
@@ -177,8 +233,10 @@ class MainActivity : ComponentActivity() {
                                 currentAnnounce = enableAnnouncement,
                                 currentDebug = debugLogging,
                                 currentTestMode = isTestMode,
-                                onSaveSettings = { url, token, devId, notifs, announce, debug, testMode ->
-                                    viewModel.saveSettings(url, token, devId, notifs, announce, debug, testMode)
+                                currentEcoMode = isEcoMode,
+                                currentPingSec = pingIntervalSeconds,
+                                onSaveSettings = { url, token, devId, notifs, announce, debug, testMode, eco, pingSec ->
+                                    viewModel.saveSettings(url, token, devId, notifs, announce, debug, testMode, eco, pingSec)
                                 }
                             )
                         }

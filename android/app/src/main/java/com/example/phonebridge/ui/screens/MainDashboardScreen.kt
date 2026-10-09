@@ -39,6 +39,7 @@ fun MainDashboardScreen(
     onTestCallState: () -> Unit,
     onRequestPhoneRole: () -> Unit,
     onQuickSimulateCall: () -> Unit,
+    onNavigateToControls: () -> Unit,
     onNavigateToTest: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -145,6 +146,19 @@ fun MainDashboardScreen(
 
         // 10 JARVIS capabilities showcase grid
         JarvisCapabilitiesShowcase()
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Button(
+            onClick = onNavigateToControls,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+        ) {
+            Icon(Icons.Default.Tune, contentDescription = null, tint = Color.Black)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Open Remote Controls & Diagnostics", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        }
 
         Spacer(modifier = Modifier.height(22.dp))
 

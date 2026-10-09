@@ -20,6 +20,7 @@ import com.example.phonebridge.data.CallState
 import com.example.phonebridge.data.CommandMessage
 import com.example.phonebridge.data.PreferencesManager
 import com.example.phonebridge.network.BackendApiClient
+import com.example.phonebridge.network.NetworkConnectivityMonitor
 import com.example.phonebridge.network.WebSocketManager
 import com.example.phonebridge.telecom.PhoneJarvisController
 import com.example.phonebridge.telecom.TelecomController
@@ -63,6 +64,12 @@ class PhoneBridgeForegroundService : Service() {
         private val _isBackendConnected = MutableStateFlow(false)
         val isBackendConnected = _isBackendConnected.asStateFlow()
 
+        private val _networkTypeFlow = MutableStateFlow("Connected")
+        val networkTypeFlow = _networkTypeFlow.asStateFlow()
+
+        private val _isBridgeActiveFlow = MutableStateFlow(true)
+        val isBridgeActiveFlow = _isBridgeActiveFlow.asStateFlow()
+
         var instance: PhoneBridgeForegroundService? = null
             private set
     }
@@ -72,6 +79,7 @@ class PhoneBridgeForegroundService : Service() {
     private lateinit var backendClient: BackendApiClient
     private lateinit var telecomController: TelecomController
     private lateinit var phoneJarvisController: PhoneJarvisController
+    private lateinit var networkMonitor: NetworkConnectivityMonitor
     private var webSocketManager: WebSocketManager? = null
     private var telephonyCallback: Any? = null
 
@@ -81,6 +89,23 @@ class PhoneBridgeForegroundService : Service() {
         prefs = PreferencesManager(applicationContext)
         telecomController = TelecomController(applicationContext)
         phoneJarvisController = PhoneJarvisController(applicationContext)
+        _isBridgeActiveFlow.value = prefs.isBridgeEnabled
+
+        networkMonitor = NetworkConnectivityMonitor(
+            context = applicationContext,
+            onNetworkRestored = {
+                _networkTypeFlow.value = networkMonitor.networkType.value
+                if (prefs.isBridgeEnabled) {
+                    webSocketManager?.onNetworkRestored()
+                }
+            },
+            onNetworkLostCallback = {
+                _networkTypeFlow.value = "Offline"
+                webSocketManager?.onNetworkLost()
+            }
+        )
+        networkMonitor.start()
+        _networkTypeFlow.value = networkMonitor.networkType.value
 
         backendClient = BackendApiClient(
             baseUrlProvider = { prefs.backendUrl },
@@ -90,7 +115,10 @@ class PhoneBridgeForegroundService : Service() {
 
         createNotificationChannels()
         try {
-            val notification = buildForegroundNotification("Connected & Monitoring Calls")
+            val notification = buildForegroundNotification(
+                if (prefs.isBridgeEnabled) "Active • Monitoring Calls & Jarvis Commands"
+                else "Paused (Battery Saving Mode)"
+            )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 androidx.core.app.ServiceCompat.startForeground(
                     this,
@@ -115,16 +143,29 @@ class PhoneBridgeForegroundService : Service() {
             baseUrlProvider = { prefs.backendUrl },
             tokenProvider = { prefs.deviceToken },
             deviceIdProvider = { prefs.deviceId },
+            isNetworkAvailable = { networkMonitor.isNetworkAvailable() },
+            pingIntervalSecProvider = { if (prefs.isEcoMode) 90L else prefs.pingIntervalSeconds.toLong() },
+            isEcoModeProvider = { prefs.isEcoMode },
             onCommandReceived = { command -> handleIncomingCommand(command) },
             onConnectionChanged = { connected ->
                 _isBackendConnected.value = connected
-                updateForegroundNotification(if (connected) "Connected to Alexa backend" else "Reconnecting to backend...")
+                val statusText = when {
+                    !prefs.isBridgeEnabled -> "Bridge Paused (Power Saving)"
+                    connected -> "Connected to Alexa (Echo Online)"
+                    !networkMonitor.isNetworkAvailable() -> "Offline (Waiting for network)"
+                    else -> "Reconnecting to backend..."
+                }
+                updateForegroundNotification(statusText)
             },
             onLog = { tag, msg, isError ->
                 logEvent(tag, msg, isError)
             }
         )
-        webSocketManager?.start()
+        if (prefs.isBridgeEnabled) {
+            webSocketManager?.start()
+        } else {
+            updateForegroundNotification("Bridge Paused (Power Saving)")
+        }
     }
 
     private fun setupInCallServiceListener() {
@@ -447,12 +488,32 @@ class PhoneBridgeForegroundService : Service() {
         }
     }
 
+    fun setBridgeEnabled(enabled: Boolean) {
+        prefs.isBridgeEnabled = enabled
+        _isBridgeActiveFlow.value = enabled
+        if (enabled) {
+            logEvent("SERVICE", "Bridge connection resumed by user", false)
+            webSocketManager?.start()
+            updateForegroundNotification("Connecting to Alexa...")
+        } else {
+            logEvent("SERVICE", "Bridge paused by user (Power Saving Standby)", false)
+            webSocketManager?.stop()
+            _isBackendConnected.value = false
+            updateForegroundNotification("Bridge Paused (Power Saving)")
+        }
+    }
+
+    fun getJarvisController(): PhoneJarvisController = phoneJarvisController
+
+    fun getPrefs(): PreferencesManager = prefs
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         super.onDestroy()
         instance = null
         serviceScope.cancel()
+        networkMonitor.stop()
         webSocketManager?.stop()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && telephonyCallback != null) {
             val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager

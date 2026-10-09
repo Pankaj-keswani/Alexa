@@ -18,25 +18,25 @@ class WebSocketManager(
     private val baseUrlProvider: () -> String,
     private val tokenProvider: () -> String,
     private val deviceIdProvider: () -> String,
+    private val isNetworkAvailable: () -> Boolean = { true },
+    private val pingIntervalSecProvider: () -> Long = { 60L },
+    private val isEcoModeProvider: () -> Boolean = { false },
     private val onCommandReceived: (CommandMessage) -> Unit,
     private val onConnectionChanged: (Boolean) -> Unit,
     private val onLog: (tag: String, message: String, isError: Boolean) -> Unit
 ) {
     companion object {
         private const val TAG = "WebSocketManager"
-        private const val RECONNECT_DELAY_MS = 5000L
     }
 
     private val gson = Gson()
-    private val client = OkHttpClient.Builder()
-        .readTimeout(0, TimeUnit.MILLISECONDS)
-        .pingInterval(20, TimeUnit.SECONDS)
-        .build()
+    private var client: OkHttpClient? = null
 
     private var webSocket: WebSocket? = null
     private val isRunning = AtomicBoolean(false)
     private val isConnected = AtomicBoolean(false)
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var reconnectAttempts = 0
 
     private val reconnectRunnable = Runnable {
         if (isRunning.get() && !isConnected.get()) {
@@ -44,8 +44,25 @@ class WebSocketManager(
         }
     }
 
+    private fun getClient(): OkHttpClient {
+        val pingSec = pingIntervalSecProvider().coerceIn(30L, 300L)
+        val currentClient = client
+        if (currentClient != null) {
+            return currentClient
+        }
+
+        val newClient = OkHttpClient.Builder()
+            .readTimeout(0, TimeUnit.MILLISECONDS)
+            .pingInterval(pingSec, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(false)
+            .build()
+        client = newClient
+        return newClient
+    }
+
     fun start() {
         if (isRunning.compareAndSet(false, true)) {
+            reconnectAttempts = 0
             connectInternal()
         }
     }
@@ -57,8 +74,25 @@ class WebSocketManager(
     }
 
     fun reconnect() {
+        reconnectAttempts = 0
+        mainHandler.removeCallbacks(reconnectRunnable)
         closeSocket()
         connectInternal()
+    }
+
+    fun onNetworkRestored() {
+        if (isRunning.get() && !isConnected.get()) {
+            onLog("BACKEND", "Network restored: attempting immediate reconnection", false)
+            reconnectAttempts = 0
+            mainHandler.removeCallbacks(reconnectRunnable)
+            connectInternal()
+        }
+    }
+
+    fun onNetworkLost() {
+        mainHandler.removeCallbacks(reconnectRunnable)
+        closeSocket()
+        onLog("BACKEND", "Network offline: pausing socket retries to preserve battery", false)
     }
 
     fun sendCommandResult(result: CommandResponse) {
@@ -75,7 +109,22 @@ class WebSocketManager(
         notifyConnection(false)
     }
 
+    private fun getNextReconnectDelayMs(): Long {
+        val isEco = isEcoModeProvider()
+        val base = if (isEco) 8000L else 5000L
+        val maxDelay = if (isEco) 120000L else 60000L
+        val factor = (1 shl reconnectAttempts.coerceAtMost(5)).toLong()
+        val delay = (base * factor).coerceAtMost(maxDelay)
+        val jitter = (Math.random() * 2000).toLong()
+        return delay + jitter
+    }
+
     private fun connectInternal() {
+        if (!isNetworkAvailable()) {
+            onLog("BACKEND", "No active internet connection. Waiting for network...", false)
+            return
+        }
+
         val rawBase = baseUrlProvider().trim().removeSuffix("/")
         if (rawBase.isBlank()) {
             onLog("BACKEND", "WebSocket URL is empty, skipping connection", true)
@@ -101,10 +150,11 @@ class WebSocketManager(
             .addHeader("x-device-id", deviceId)
             .build()
 
-        webSocket = client.newWebSocket(request, object : WebSocketListener() {
+        webSocket = getClient().newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.i(TAG, "WebSocket connected successfully")
                 isConnected.set(true)
+                reconnectAttempts = 0
                 notifyConnection(true)
                 onLog("BACKEND", "WebSocket connected to backend", false)
             }
@@ -146,10 +196,18 @@ class WebSocketManager(
     }
 
     private fun scheduleReconnect() {
-        if (isRunning.get()) {
-            mainHandler.removeCallbacks(reconnectRunnable)
-            mainHandler.postDelayed(reconnectRunnable, RECONNECT_DELAY_MS)
+        if (!isRunning.get()) return
+        mainHandler.removeCallbacks(reconnectRunnable)
+
+        if (!isNetworkAvailable()) {
+            onLog("BACKEND", "Offline: waiting for network to reconnect", false)
+            return
         }
+
+        reconnectAttempts++
+        val delay = getNextReconnectDelayMs()
+        onLog("BACKEND", "Next retry in ${delay / 1000}s (attempt #$reconnectAttempts)", false)
+        mainHandler.postDelayed(reconnectRunnable, delay)
     }
 
     private fun notifyConnection(connected: Boolean) {

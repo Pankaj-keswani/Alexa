@@ -19,6 +19,8 @@ import android.os.StatFs
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
@@ -33,10 +35,25 @@ class PhoneJarvisController(private val context: Context) {
 
     companion object {
         private const val TAG = "PhoneJarvisController"
+        private const val ALARM_AUTO_STOP_TIMEOUT_MS = 90_000L // 90 seconds safety auto-shutoff
         private var mediaPlayer: MediaPlayer? = null
         private var isAlarmActive = false
+        private var isFlashlightOn = false
         private var ttsInstance: TextToSpeech? = null
         private var isTtsReady = false
+        private val mainHandler = Handler(Looper.getMainLooper())
+
+        private val alarmTimeoutRunnable = Runnable {
+            if (isAlarmActive) {
+                Log.i(TAG, "Phone alarm reached 90s safety timeout. Auto-stopping to save battery.")
+                try {
+                    mediaPlayer?.stop()
+                    mediaPlayer?.release()
+                } catch (_: Exception) {}
+                mediaPlayer = null
+                isAlarmActive = false
+            }
+        }
     }
 
     init {
@@ -124,9 +141,14 @@ class PhoneJarvisController(private val context: Context) {
         // Start vibration
         triggerVibration(true)
         isAlarmActive = true
+
+        // Schedule safety timeout to auto-stop after 90 seconds
+        mainHandler.removeCallbacks(alarmTimeoutRunnable)
+        mainHandler.postDelayed(alarmTimeoutRunnable, ALARM_AUTO_STOP_TIMEOUT_MS)
     }
 
     private fun stopPhoneAlarm() {
+        mainHandler.removeCallbacks(alarmTimeoutRunnable)
         try {
             mediaPlayer?.stop()
             mediaPlayer?.release()
@@ -209,6 +231,7 @@ class PhoneJarvisController(private val context: Context) {
 
             if (cameraId != null) {
                 cameraManager.setTorchMode(cameraId, enable)
+                isFlashlightOn = enable
                 CommandResponse(
                     requestId = requestId,
                     command = "SET_FLASHLIGHT",
@@ -231,6 +254,24 @@ class PhoneJarvisController(private val context: Context) {
                 reason = "Flashlight error: ${e.message}"
             )
         }
+    }
+
+    fun isFlashlightActive(): Boolean = isFlashlightOn
+    fun isAlarmActive(): Boolean = isAlarmActive
+
+    fun toggleFlashlight(): Boolean {
+        val target = !isFlashlightOn
+        setFlashlight(target, null)
+        return isFlashlightOn
+    }
+
+    fun toggleAlarm(): Boolean {
+        if (isAlarmActive) {
+            stopPhoneAlarm()
+        } else {
+            startPhoneAlarm()
+        }
+        return isAlarmActive
     }
 
     /**

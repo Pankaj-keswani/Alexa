@@ -26,6 +26,8 @@ fun SettingsScreen(
     currentAnnounce: Boolean,
     currentDebug: Boolean,
     currentTestMode: Boolean,
+    currentEcoMode: Boolean,
+    currentPingSec: Int,
     onSaveSettings: (
         url: String,
         token: String,
@@ -33,7 +35,9 @@ fun SettingsScreen(
         notifs: Boolean,
         announce: Boolean,
         debug: Boolean,
-        testMode: Boolean
+        testMode: Boolean,
+        ecoMode: Boolean,
+        pingSec: Int
     ) -> Unit
 ) {
     var url by remember(currentUrl) { mutableStateOf(currentUrl) }
@@ -43,6 +47,8 @@ fun SettingsScreen(
     var announce by remember(currentAnnounce) { mutableStateOf(currentAnnounce) }
     var debug by remember(currentDebug) { mutableStateOf(currentDebug) }
     var testMode by remember(currentTestMode) { mutableStateOf(currentTestMode) }
+    var ecoMode by remember(currentEcoMode) { mutableStateOf(currentEcoMode) }
+    var pingSec by remember(currentPingSec) { mutableIntStateOf(currentPingSec) }
 
     val scrollState = rememberScrollState()
 
@@ -243,6 +249,54 @@ fun SettingsScreen(
                         colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = NeonGreen)
                     )
                 }
+
+                Divider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
+
+                // Eco Battery Saver Mode
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Eco Battery Saver Mode", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("90s heartbeat & dynamic backoff to save maximum battery", color = TextSecondary, fontSize = 12.sp)
+                    }
+                    Switch(
+                        checked = ecoMode,
+                        onCheckedChange = { ecoMode = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = CyanPrimary)
+                    )
+                }
+
+                Divider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
+
+                // WebSocket Heartbeat / Ping Interval
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Heartbeat Ping Interval", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("${pingSec}s", color = CyanPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
+                    Text("Higher interval (60s+) reduces cellular radio wakeups", color = TextSecondary, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(30, 45, 60, 90, 120).forEach { sec ->
+                            FilterChip(
+                                selected = pingSec == sec,
+                                onClick = { pingSec = sec },
+                                label = { Text("${sec}s", fontSize = 11.sp) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = CyanPrimary.copy(alpha = 0.25f),
+                                    selectedLabelColor = CyanPrimary,
+                                    labelColor = TextSecondary
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -250,7 +304,7 @@ fun SettingsScreen(
 
         Button(
             onClick = {
-                onSaveSettings(url, token, deviceId, notifs, announce, debug, testMode)
+                onSaveSettings(url, token, deviceId, notifs, announce, debug, testMode, ecoMode, pingSec)
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
