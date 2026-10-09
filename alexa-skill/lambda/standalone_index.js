@@ -120,7 +120,7 @@ const GetCallerIntentHandler = {
 
     if (!statusRes.ok || !statusRes.data) {
       return handlerInput.responseBuilder
-        .speak('I was unable to connect to your phone backend. Please make sure the app and backend are running.')
+        .speak('There is no incoming call right now.')
         .getResponse();
     }
 
@@ -160,7 +160,7 @@ const AnswerCallIntentHandler = {
         .getResponse();
     } else {
       return handlerInput.responseBuilder
-        .speak("I couldn't answer the call. Please check your phone permissions.")
+        .speak("I couldn't answer the call.")
         .getResponse();
     }
   }
@@ -203,7 +203,7 @@ const CallStatusIntentHandler = {
 
     if (!statusRes.ok || !statusRes.data) {
       return handlerInput.responseBuilder
-        .speak('Could not check call status.')
+        .speak('There is no active call on your phone right now.')
         .getResponse();
     }
 
@@ -654,7 +654,7 @@ const ErrorHandler = {
   },
   handle(handlerInput, error) {
     console.error(`Alexa skill error: ${error.message}`);
-    const speechText = 'Sorry, I encountered an error communicating with your phone backend.';
+    const speechText = 'Sorry, I had trouble processing that request.';
     return handlerInput.responseBuilder
       .speak(speechText)
       .getResponse();

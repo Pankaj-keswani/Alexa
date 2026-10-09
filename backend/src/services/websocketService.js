@@ -120,7 +120,7 @@ class WebSocketService {
         logger.backend(`Cannot send command [${command}]: No connected Android device available`);
         return resolve({
           success: false,
-          reason: 'No Android phone is currently connected to PhoneBridge backend.'
+          reason: 'Device unreachable.'
         });
       }
 
