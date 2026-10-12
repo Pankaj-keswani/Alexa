@@ -111,7 +111,7 @@ class WebSocketService {
    * Sends a command (ANSWER_CALL, REJECT_CALL, etc.) to the Android device.
    * Returns a promise that resolves when the Android device acknowledges the command.
    */
-  sendCommandToDevice(command, payload = {}, targetDeviceId = null, timeoutMs = 6000) {
+  sendCommandToDevice(command, payload = {}, targetDeviceId = null, timeoutMs = 2500) {
     return new Promise((resolve, reject) => {
       // Pick target device
       const deviceId = targetDeviceId || config.defaultDeviceId || Array.from(this.connectedClients.keys())[0];

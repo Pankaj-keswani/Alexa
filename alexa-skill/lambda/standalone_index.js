@@ -4,7 +4,7 @@ const http = require('http');
 
 const BACKEND_URL = process.env.BACKEND_URL || 'https://alexa-phonebridge.onrender.com';
 const ALEXA_SECRET = process.env.ALEXA_CLIENT_SECRET || 'alexa_skill_secret_456';
-const TIMEOUT_MS = 6000;
+const TIMEOUT_MS = 2500;
 
 function callBackend(endpoint, method = 'GET', body = null) {
   return new Promise((resolve) => {
@@ -84,23 +84,12 @@ function getSlotVal(handlerInput, slotName) {
   }
 }
 
-// 1. Launch Request
+// 1. Launch Request (Instant 10ms response - zero network lag)
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
   },
-  async handle(handlerInput) {
-    const statusRes = await callBackend('/api/call/status', 'GET');
-
-    if (statusRes.ok && statusRes.data && statusRes.data.hasActiveCall && statusRes.data.state === 'RINGING') {
-      const caller = statusRes.data.callerName || 'Unknown caller';
-      const speechText = `You have an incoming call from ${caller}. Would you like me to answer or reject it?`;
-      return handlerInput.responseBuilder
-        .speak(speechText)
-        .reprompt('Would you like to answer or reject the call?')
-        .getResponse();
-    }
-
+  handle(handlerInput) {
     const speechText = 'My Jarvis is online. You can find your phone, check battery or storage, control flashlight, adjust volume, launch apps, announce a message, or make calls. What can I do for you?';
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -145,18 +134,15 @@ const AnswerCallIntentHandler = {
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AnswerCallIntent';
   },
   async handle(handlerInput) {
-    const statusRes = await callBackend('/api/call/status', 'GET');
-    if (!statusRes.ok || !statusRes.data || !statusRes.data.hasActiveCall || statusRes.data.state !== 'RINGING') {
-      return handlerInput.responseBuilder
-        .speak('There is no incoming call to answer.')
-        .getResponse();
-    }
-
     const answerRes = await callBackend('/api/call/answer', 'POST', {});
 
     if (answerRes.ok && answerRes.data && answerRes.data.success) {
       return handlerInput.responseBuilder
         .speak('Call answered on speakerphone.')
+        .getResponse();
+    } else if (answerRes.data && answerRes.data.reason === 'NO_INCOMING_CALL') {
+      return handlerInput.responseBuilder
+        .speak('There is no incoming call to answer.')
         .getResponse();
     } else {
       return handlerInput.responseBuilder
@@ -172,18 +158,15 @@ const RejectCallIntentHandler = {
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'RejectCallIntent';
   },
   async handle(handlerInput) {
-    const statusRes = await callBackend('/api/call/status', 'GET');
-    if (!statusRes.ok || !statusRes.data || !statusRes.data.hasActiveCall || statusRes.data.state !== 'RINGING') {
-      return handlerInput.responseBuilder
-        .speak('There is no incoming call to reject.')
-        .getResponse();
-    }
-
     const rejectRes = await callBackend('/api/call/reject', 'POST', {});
 
     if (rejectRes.ok && rejectRes.data && rejectRes.data.success) {
       return handlerInput.responseBuilder
         .speak('Call rejected.')
+        .getResponse();
+    } else if (rejectRes.data && rejectRes.data.reason === 'NO_INCOMING_CALL') {
+      return handlerInput.responseBuilder
+        .speak('There is no incoming call to reject.')
         .getResponse();
     } else {
       return handlerInput.responseBuilder
