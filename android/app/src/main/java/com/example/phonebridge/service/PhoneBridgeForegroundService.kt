@@ -18,6 +18,7 @@ import com.example.phonebridge.R
 import com.example.phonebridge.data.CallEventPayload
 import com.example.phonebridge.data.CallState
 import com.example.phonebridge.data.CommandMessage
+import com.example.phonebridge.data.CommandResponse
 import com.example.phonebridge.data.PreferencesManager
 import com.example.phonebridge.network.BackendApiClient
 import com.example.phonebridge.network.NetworkConnectivityMonitor
@@ -295,6 +296,35 @@ class PhoneBridgeForegroundService : Service() {
 
     private fun handleIncomingCommand(command: CommandMessage) {
         logEvent("ALEXA", "Processing Alexa command: ${command.command}", false)
+
+        // Check if the requested feature is enabled for Alexa in app settings
+        val featureKey = when (command.command) {
+            "ANSWER_CALL", "REJECT_CALL" -> PreferencesManager.FEATURE_CALL
+            "FIND_PHONE" -> PreferencesManager.FEATURE_FIND_PHONE
+            "GET_BATTERY" -> PreferencesManager.FEATURE_BATTERY
+            "SET_FLASHLIGHT" -> PreferencesManager.FEATURE_FLASHLIGHT
+            "MAKE_CALL" -> PreferencesManager.FEATURE_MAKE_CALL
+            "SEND_WHATSAPP" -> PreferencesManager.FEATURE_WHATSAPP
+            "OPEN_APP" -> PreferencesManager.FEATURE_OPEN_APP
+            "SET_VOLUME" -> PreferencesManager.FEATURE_VOLUME
+            "SPEAK_MESSAGE" -> PreferencesManager.FEATURE_INTERCOM
+            "GET_DEVICE_STATS" -> PreferencesManager.FEATURE_DEVICE_STATS
+            "SEND_SMS" -> PreferencesManager.FEATURE_SMS
+            else -> null
+        }
+
+        if (featureKey != null && !prefs.isFeatureEnabled(featureKey)) {
+            val disabledResult = CommandResponse(
+                requestId = command.requestId,
+                command = command.command,
+                success = false,
+                reason = "This feature has been disabled in the phone settings"
+            )
+            webSocketManager?.sendCommandResult(disabledResult)
+            logEvent("JARVIS", "Command ${command.command} blocked: feature disabled in phone app settings", true)
+            return
+        }
+
         when (command.command) {
             "ANSWER_CALL" -> executeAnswerCommand(command.requestId)
             "REJECT_CALL" -> executeRejectCommand(command.requestId)

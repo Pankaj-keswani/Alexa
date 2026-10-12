@@ -91,6 +91,7 @@ class MainActivity : ComponentActivity() {
                 val enableAnnouncement by viewModel.enableAnnouncement.collectAsState()
                 val debugLogging by viewModel.debugLogging.collectAsState()
                 val isTestMode by viewModel.isTestMode.collectAsState()
+                val featureStates by viewModel.featureStates.collectAsState()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -181,11 +182,17 @@ class MainActivity : ComponentActivity() {
                                 phoneNumber = phoneNumber,
                                 isDefaultDialer = isDefaultDialer,
                                 statusMessage = statusMessage,
+                                featureStates = featureStates,
+                                onToggleFeature = { featId, enabled -> viewModel.toggleFeature(featId, enabled) },
                                 onTestBackend = { viewModel.testBackendConnection() },
                                 onTestAlexa = { viewModel.testAlexaIntegration() },
                                 onTestCallState = { viewModel.testCallState() },
                                 onRequestPhoneRole = { requestPhoneDialerRole() },
                                 onQuickSimulateCall = { viewModel.simulateIncomingCall("Rahul", "+919876543210") },
+                                onTestFlashlight = { viewModel.toggleFlashlight() },
+                                onTestAlarm = { viewModel.toggleAlarm() },
+                                onTestSoundMode = { viewModel.setSoundProfile(it) },
+                                onTestTts = { viewModel.speakTts(it) },
                                 onNavigateToControls = { selectedTab = 1 },
                                 onNavigateToTest = { selectedTab = 2 }
                             )

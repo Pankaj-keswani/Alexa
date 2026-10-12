@@ -84,6 +84,15 @@ function getSlotVal(handlerInput, slotName) {
   }
 }
 
+function getFeatureDisabledMessage(res) {
+  if (res && res.data && res.data.reason && typeof res.data.reason === 'string') {
+    if (res.data.reason.indexOf('disabled in the phone settings') !== -1) {
+      return 'This feature is currently turned off in your PhoneBridge app settings.';
+    }
+  }
+  return null;
+}
+
 // 1. Launch Request (Instant 10ms response - zero network lag)
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -136,6 +145,11 @@ const AnswerCallIntentHandler = {
   async handle(handlerInput) {
     const answerRes = await callBackend('/api/call/answer', 'POST', {});
 
+    const disabledMsg = getFeatureDisabledMessage(answerRes);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (answerRes.ok && answerRes.data && answerRes.data.success) {
       return handlerInput.responseBuilder
         .speak('Call answered on speakerphone.')
@@ -159,6 +173,11 @@ const RejectCallIntentHandler = {
   },
   async handle(handlerInput) {
     const rejectRes = await callBackend('/api/call/reject', 'POST', {});
+
+    const disabledMsg = getFeatureDisabledMessage(rejectRes);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
 
     if (rejectRes.ok && rejectRes.data && rejectRes.data.success) {
       return handlerInput.responseBuilder
@@ -223,6 +242,11 @@ const FindPhoneIntentHandler = {
   },
   async handle(handlerInput) {
     const res = await callBackend('/api/phone/find', 'POST', { action: 'START' });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       return handlerInput.responseBuilder
         .speak('Sounding the alarm on your phone now.')
@@ -242,6 +266,11 @@ const StopFindPhoneIntentHandler = {
   },
   async handle(handlerInput) {
     const res = await callBackend('/api/phone/find', 'POST', { action: 'STOP' });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       return handlerInput.responseBuilder
         .speak('Phone alarm stopped.')
@@ -262,6 +291,11 @@ const BatteryStatusIntentHandler = {
   },
   async handle(handlerInput) {
     const res = await callBackend('/api/phone/battery', 'GET');
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       const level = res.data.batteryLevel;
       const charging = res.data.isCharging;
@@ -292,6 +326,11 @@ const FlashlightIntentHandler = {
     const targetState = !isOff;
 
     const res = await callBackend('/api/phone/flashlight', 'POST', { state: targetState });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       const text = targetState ? 'Turned on flashlight.' : 'Turned off flashlight.';
       return handlerInput.responseBuilder
@@ -321,6 +360,11 @@ const MakeCallIntentHandler = {
     }
 
     const res = await callBackend('/api/phone/call', 'POST', { target });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       return handlerInput.responseBuilder
         .speak(`Calling ${target} on speakerphone.`)
@@ -382,6 +426,11 @@ const OpenAppIntentHandler = {
     }
 
     const res = await callBackend('/api/phone/app', 'POST', { appName });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       return handlerInput.responseBuilder
         .speak(`Opening ${appName} on your phone.`)
@@ -412,6 +461,10 @@ const SetVolumeIntentHandler = {
     }
 
     const res = await callBackend('/api/phone/volume', 'POST', { mode });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
     if (res.ok && res.data && res.data.success) {
       let text = `Phone sound mode set to ${mode.toLowerCase()}.`;
       if (mode === 'MAX') text = 'Phone volume set to maximum.';
@@ -443,6 +496,11 @@ const SpeakMessageIntentHandler = {
     }
 
     const res = await callBackend('/api/phone/speak', 'POST', { message });
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       return handlerInput.responseBuilder
         .speak('Broadcasting message on your phone.')
@@ -463,6 +521,11 @@ const DeviceStatsIntentHandler = {
   },
   async handle(handlerInput) {
     const res = await callBackend('/api/phone/stats', 'GET');
+    const disabledMsg = getFeatureDisabledMessage(res);
+    if (disabledMsg) {
+      return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+    }
+
     if (res.ok && res.data && res.data.success) {
       const freeStorageGb = res.data.freeStorageGb;
       const totalStorageGb = res.data.totalStorageGb;
@@ -545,6 +608,11 @@ const DictateMessageIntentHandler = {
 
     if (pendingAction === 'SMS') {
       const res = await callBackend('/api/phone/sms', 'POST', { target: pendingTarget, message: message });
+      const disabledMsg = getFeatureDisabledMessage(res);
+      if (disabledMsg) {
+        return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+      }
+
       if (res.ok && res.data && res.data.success) {
         return handlerInput.responseBuilder
           .speak('SMS text sent to ' + pendingTarget + '.')
@@ -557,6 +625,11 @@ const DictateMessageIntentHandler = {
     } else {
       // Default to WhatsApp
       const res = await callBackend('/api/phone/whatsapp', 'POST', { target: pendingTarget, message: message });
+      const disabledMsg = getFeatureDisabledMessage(res);
+      if (disabledMsg) {
+        return handlerInput.responseBuilder.speak(disabledMsg).getResponse();
+      }
+
       if (res.ok && res.data && res.data.success) {
         return handlerInput.responseBuilder
           .speak('WhatsApp message sent to ' + pendingTarget + '.')

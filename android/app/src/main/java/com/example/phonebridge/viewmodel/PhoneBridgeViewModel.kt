@@ -91,6 +91,19 @@ class PhoneBridgeViewModel(application: Application) : AndroidViewModel(applicat
     val isEcoMode = MutableStateFlow(prefs.isEcoMode)
     val pingIntervalSeconds = MutableStateFlow(prefs.pingIntervalSeconds)
 
+    // Feature toggles for Alexa voice control
+    private val _featureStates = MutableStateFlow<Map<String, Boolean>>(prefs.getAllFeatureStates())
+    val featureStates: StateFlow<Map<String, Boolean>> = _featureStates.asStateFlow()
+
+    fun toggleFeature(featureId: String, enabled: Boolean) {
+        prefs.setFeatureEnabled(featureId, enabled)
+        val updated = _featureStates.value.toMutableMap()
+        updated[featureId] = enabled
+        _featureStates.value = updated
+        val featName = com.example.phonebridge.data.JarvisFeatureRegistry.getFeatureById(featureId)?.name ?: featureId
+        _statusMessage.value = "$featName ${if (enabled) "enabled" else "disabled"} for Alexa"
+    }
+
     init {
         checkPhoneRole()
         refreshDeviceStats()

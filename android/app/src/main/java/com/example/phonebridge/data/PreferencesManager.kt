@@ -19,6 +19,33 @@ class PreferencesManager(context: Context) {
         private const val KEY_IS_ECO_MODE = "is_eco_mode"
         private const val KEY_PING_INTERVAL = "ping_interval_seconds"
         private const val DEFAULT_BACKEND_URL = "https://alexa-phonebridge.onrender.com"
+
+        // Feature keys for Alexa voice control permissions
+        const val FEATURE_FIND_PHONE = "find_phone"
+        const val FEATURE_FLASHLIGHT = "flashlight"
+        const val FEATURE_CALL = "call"
+        const val FEATURE_MAKE_CALL = "make_call"
+        const val FEATURE_VOLUME = "volume"
+        const val FEATURE_BATTERY = "battery"
+        const val FEATURE_DEVICE_STATS = "device_stats"
+        const val FEATURE_INTERCOM = "intercom"
+        const val FEATURE_WHATSAPP = "whatsapp"
+        const val FEATURE_SMS = "sms"
+        const val FEATURE_OPEN_APP = "open_app"
+
+        val ALL_FEATURES = listOf(
+            FEATURE_FIND_PHONE,
+            FEATURE_FLASHLIGHT,
+            FEATURE_CALL,
+            FEATURE_MAKE_CALL,
+            FEATURE_VOLUME,
+            FEATURE_BATTERY,
+            FEATURE_DEVICE_STATS,
+            FEATURE_INTERCOM,
+            FEATURE_WHATSAPP,
+            FEATURE_SMS,
+            FEATURE_OPEN_APP
+        )
     }
 
     var backendUrl: String
@@ -67,4 +94,16 @@ class PreferencesManager(context: Context) {
     var pingIntervalSeconds: Int
         get() = prefs.getInt(KEY_PING_INTERVAL, 60)
         set(value) = prefs.edit().putInt(KEY_PING_INTERVAL, value.coerceIn(30, 300)).apply()
+
+    fun isFeatureEnabled(featureKey: String): Boolean {
+        return prefs.getBoolean("feature_${featureKey}_alexa_enabled", true)
+    }
+
+    fun setFeatureEnabled(featureKey: String, enabled: Boolean) {
+        prefs.edit().putBoolean("feature_${featureKey}_alexa_enabled", enabled).apply()
+    }
+
+    fun getAllFeatureStates(): Map<String, Boolean> {
+        return ALL_FEATURES.associateWith { isFeatureEnabled(it) }
+    }
 }

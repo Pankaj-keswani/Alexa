@@ -22,6 +22,7 @@ import com.example.phonebridge.data.CallState
 import com.example.phonebridge.ui.components.CallStatusCard
 import com.example.phonebridge.ui.components.ConnectionStatusCard
 import com.example.phonebridge.ui.components.JarvisCapabilitiesShowcase
+import com.example.phonebridge.ui.components.InteractiveFeaturePanels
 import com.example.phonebridge.ui.components.PhoneRoleCard
 import com.example.phonebridge.ui.theme.*
 
@@ -34,11 +35,17 @@ fun MainDashboardScreen(
     phoneNumber: String?,
     isDefaultDialer: Boolean,
     statusMessage: String?,
+    featureStates: Map<String, Boolean>,
+    onToggleFeature: (String, Boolean) -> Unit,
     onTestBackend: () -> Unit,
     onTestAlexa: () -> Unit,
     onTestCallState: () -> Unit,
     onRequestPhoneRole: () -> Unit,
     onQuickSimulateCall: () -> Unit,
+    onTestFlashlight: () -> Unit,
+    onTestAlarm: () -> Unit,
+    onTestSoundMode: (String) -> Unit,
+    onTestTts: (String) -> Unit,
     onNavigateToControls: () -> Unit,
     onNavigateToTest: () -> Unit
 ) {
@@ -144,8 +151,16 @@ fun MainDashboardScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 10 JARVIS capabilities showcase grid
-        JarvisCapabilitiesShowcase()
+        // JARVIS Interactive Capability Panels (Clickable, Alexa Toggleable, Command Explorer)
+        InteractiveFeaturePanels(
+            featureStates = featureStates,
+            onToggleFeature = onToggleFeature,
+            onTestFlashlight = onTestFlashlight,
+            onTestAlarm = onTestAlarm,
+            onTestSimulateCall = onQuickSimulateCall,
+            onTestSoundMode = onTestSoundMode,
+            onTestTts = onTestTts
+        )
 
         Spacer(modifier = Modifier.height(14.dp))
 
