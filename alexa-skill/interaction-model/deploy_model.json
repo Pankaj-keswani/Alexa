@@ -51,7 +51,13 @@
             "who is calling on my phone",
             "caller details",
             "tell me the caller",
-            "caller id"
+            "caller id",
+            "kiska phone hai",
+            "kiska call hai",
+            "kaun phone kar raha hai",
+            "kaun call kar raha hai",
+            "kaun hai phone par",
+            "caller"
           ]
         },
         {
@@ -66,7 +72,13 @@
             "answer phone",
             "pick up my phone",
             "accept incoming call",
-            "take the call"
+            "take the call",
+            "phone uthao",
+            "call uthao",
+            "phone utha lo",
+            "call utha lo",
+            "uthana",
+            "uthalo"
           ]
         },
         {
@@ -81,7 +93,14 @@
             "drop the call",
             "disconnect",
             "ignore call",
-            "reject phone call"
+            "reject phone call",
+            "phone kaat do",
+            "call kaat do",
+            "phone kaato",
+            "call kaato",
+            "decline karo",
+            "cut call",
+            "drop call"
           ]
         },
         {
@@ -95,7 +114,11 @@
             "what is the call status",
             "check incoming calls",
             "is my phone ringing",
-            "call status"
+            "call status",
+            "phone status",
+            "kisi ka phone aa raha hai kya",
+            "call aa rahi hai kya",
+            "phone ring ho raha hai kya"
           ]
         },
         {
@@ -112,7 +135,24 @@
             "trigger siren",
             "start phone alarm",
             "ring my mobile",
-            "find my mobile"
+            "find my mobile",
+            "phone dhundo",
+            "mera phone dhundo",
+            "phone baja do",
+            "phone bajao",
+            "mera phone bajao",
+            "phone kahan hai",
+            "mera phone kahan hai",
+            "alarm bajao",
+            "siren bajao",
+            "phone par bell bajao",
+            "phone ring",
+            "ring mobile",
+            "find mobile",
+            "siren",
+            "alarm",
+            "buzz phone",
+            "locate phone"
           ]
         },
         {
@@ -129,7 +169,18 @@
             "found my phone",
             "i found my phone",
             "stop finding phone",
-            "stop phone ringing"
+            "stop phone ringing",
+            "phone mil gaya",
+            "mil gaya phone",
+            "alarm band karo",
+            "siren band karo",
+            "phone chup karao",
+            "bajna band karo",
+            "ring band karo",
+            "stop ring",
+            "stop siren",
+            "silence phone",
+            "found it"
           ]
         },
         {
@@ -149,7 +200,19 @@
             "battery status",
             "how much charge does my phone have",
             "is my phone charging",
-            "battery percentage"
+            "battery percentage",
+            "battery kitni hai",
+            "kitni battery hai",
+            "charge kitna hai",
+            "battery check karo",
+            "battery batao",
+            "phone me kitna charge hai",
+            "battery kitna percent hai",
+            "battery",
+            "check battery",
+            "battery percent",
+            "charge",
+            "phone charge"
           ]
         },
         {
@@ -176,7 +239,24 @@
             "turn on the flashlight",
             "turn off the flashlight",
             "turn on the torch",
-            "turn off the torch"
+            "turn off the torch",
+            "torch jalao",
+            "torch jala do",
+            "torch on karo",
+            "torch band karo",
+            "light jalao",
+            "light band karo",
+            "flashlight on karo",
+            "flashlight band karo",
+            "torch chalu karo",
+            "torch on",
+            "torch off",
+            "flashlight on",
+            "flashlight off",
+            "light on",
+            "light off",
+            "phone light on",
+            "phone light off"
           ]
         },
         {
@@ -197,7 +277,11 @@
             "place a call to {target}",
             "dial number {target}",
             "please call {target}",
-            "call to {target}"
+            "call to {target}",
+            "{target} ko call lagao",
+            "{target} ko call karo",
+            "{target} ko phone lagao",
+            "{target} ko phone karo"
           ]
         },
         {
@@ -222,7 +306,10 @@
             "send whatsapp",
             "send a whatsapp",
             "send a whatsapp message",
-            "whatsapp someone"
+            "whatsapp someone",
+            "{target} ko whatsapp karo",
+            "{target} ko whatsapp bhejo",
+            "{target} ko message bhejo whatsapp par"
           ]
         },
         {
@@ -242,7 +329,11 @@
             "start app {appName}",
             "open the {appName} app",
             "open {appName} on my phone",
-            "launch {appName} on my phone"
+            "launch {appName} on my phone",
+            "{appName} kholo",
+            "{appName} open karo",
+            "{appName} chalu karo",
+            "{appName} start karo"
           ]
         },
         {
@@ -269,7 +360,24 @@
             "set phone volume to max",
             "set phone to max volume",
             "mute my phone",
-            "mute phone"
+            "mute phone",
+            "silent karo",
+            "phone silent karo",
+            "silent kar do",
+            "phone mute karo",
+            "vibrate karo",
+            "vibrate kar do",
+            "awaz full karo",
+            "awaz badha do",
+            "awaz kam karo",
+            "phone normal karo",
+            "silent",
+            "mute",
+            "vibrate",
+            "normal",
+            "max volume",
+            "full volume",
+            "loud"
           ]
         },
         {
@@ -287,7 +395,11 @@
             "broadcast on my phone {message}",
             "tell my phone {message}",
             "speak message {message} on phone",
-            "announce message {message} on my phone"
+            "announce message {message} on my phone",
+            "phone par bolo {message}",
+            "phone par bol do {message}",
+            "phone me bolo {message}",
+            "phone par announce karo {message}"
           ]
         },
         {
@@ -303,7 +415,14 @@
             "check phone specs",
             "device storage status",
             "phone storage details",
-            "check phone status"
+            "check phone status",
+            "storage kitni hai",
+            "storage check karo",
+            "ram kitni hai",
+            "phone me memory kitni hai",
+            "storage",
+            "ram",
+            "memory"
           ]
         },
         {
@@ -329,7 +448,10 @@
             "send an sms",
             "send a text",
             "send text",
-            "text someone"
+            "text someone",
+            "{target} ko message karo",
+            "{target} ko text karo",
+            "{target} ko sms bhejo"
           ]
         },
         {
@@ -356,7 +478,11 @@
             "please send {message}",
             "please say {message}",
             "write {message}",
-            "message {message}"
+            "message {message}",
+            "bolo {message}",
+            "likho {message}",
+            "bhejo {message}",
+            "message hai {message}"
           ]
         }
       ],
@@ -368,14 +494,24 @@
               "id": "ON",
               "name": {
                 "value": "on",
-                "synonyms": ["turn on", "switch on", "enable", "start"]
+                "synonyms": [
+                  "turn on",
+                  "switch on",
+                  "enable",
+                  "start"
+                ]
               }
             },
             {
               "id": "OFF",
               "name": {
                 "value": "off",
-                "synonyms": ["turn off", "switch off", "disable", "stop"]
+                "synonyms": [
+                  "turn off",
+                  "switch off",
+                  "disable",
+                  "stop"
+                ]
               }
             }
           ]
@@ -387,28 +523,42 @@
               "id": "SILENT",
               "name": {
                 "value": "silent",
-                "synonyms": ["mute", "silence", "quiet"]
+                "synonyms": [
+                  "mute",
+                  "silence",
+                  "quiet"
+                ]
               }
             },
             {
               "id": "VIBRATE",
               "name": {
                 "value": "vibrate",
-                "synonyms": ["vibration"]
+                "synonyms": [
+                  "vibration"
+                ]
               }
             },
             {
               "id": "NORMAL",
               "name": {
                 "value": "normal",
-                "synonyms": ["ring", "regular"]
+                "synonyms": [
+                  "ring",
+                  "regular"
+                ]
               }
             },
             {
               "id": "MAX",
               "name": {
                 "value": "max",
-                "synonyms": ["maximum", "loud", "full volume", "hundred percent"]
+                "synonyms": [
+                  "maximum",
+                  "loud",
+                  "full volume",
+                  "hundred percent"
+                ]
               }
             }
           ]
@@ -420,28 +570,38 @@
               "id": "YOUTUBE",
               "name": {
                 "value": "youtube",
-                "synonyms": ["you tube", "video"]
+                "synonyms": [
+                  "you tube",
+                  "video"
+                ]
               }
             },
             {
               "id": "SPOTIFY",
               "name": {
                 "value": "spotify",
-                "synonyms": ["music", "songs"]
+                "synonyms": [
+                  "music",
+                  "songs"
+                ]
               }
             },
             {
               "id": "WHATSAPP",
               "name": {
                 "value": "whatsapp",
-                "synonyms": ["whats app"]
+                "synonyms": [
+                  "whats app"
+                ]
               }
             },
             {
               "id": "INSTAGRAM",
               "name": {
                 "value": "instagram",
-                "synonyms": ["insta"]
+                "synonyms": [
+                  "insta"
+                ]
               }
             },
             {
@@ -454,14 +614,20 @@
               "id": "MAPS",
               "name": {
                 "value": "maps",
-                "synonyms": ["google maps", "navigation"]
+                "synonyms": [
+                  "google maps",
+                  "navigation"
+                ]
               }
             },
             {
               "id": "CHROME",
               "name": {
                 "value": "chrome",
-                "synonyms": ["google chrome", "browser"]
+                "synonyms": [
+                  "google chrome",
+                  "browser"
+                ]
               }
             },
             {
@@ -480,21 +646,28 @@
               "id": "PHOTOS",
               "name": {
                 "value": "photos",
-                "synonyms": ["gallery"]
+                "synonyms": [
+                  "gallery"
+                ]
               }
             },
             {
               "id": "GMAIL",
               "name": {
                 "value": "gmail",
-                "synonyms": ["email", "mail"]
+                "synonyms": [
+                  "email",
+                  "mail"
+                ]
               }
             },
             {
               "id": "TWITTER",
               "name": {
                 "value": "twitter",
-                "synonyms": ["x"]
+                "synonyms": [
+                  "x"
+                ]
               }
             },
             {
@@ -512,35 +685,52 @@
               "id": "MOM",
               "name": {
                 "value": "mom",
-                "synonyms": ["mummy", "mother", "maa"]
+                "synonyms": [
+                  "mummy",
+                  "mother",
+                  "maa"
+                ]
               }
             },
             {
               "id": "DAD",
               "name": {
                 "value": "dad",
-                "synonyms": ["papa", "father", "pitaji"]
+                "synonyms": [
+                  "papa",
+                  "father",
+                  "pitaji"
+                ]
               }
             },
             {
               "id": "BROTHER",
               "name": {
                 "value": "brother",
-                "synonyms": ["bhai", "bro"]
+                "synonyms": [
+                  "bhai",
+                  "bro"
+                ]
               }
             },
             {
               "id": "SISTER",
               "name": {
                 "value": "sister",
-                "synonyms": ["didi", "sis"]
+                "synonyms": [
+                  "didi",
+                  "sis"
+                ]
               }
             },
             {
               "id": "FRIEND",
               "name": {
                 "value": "friend",
-                "synonyms": ["dost", "buddy"]
+                "synonyms": [
+                  "dost",
+                  "buddy"
+                ]
               }
             },
             {
@@ -559,7 +749,10 @@
               "id": "BOSS",
               "name": {
                 "value": "boss",
-                "synonyms": ["manager", "sir"]
+                "synonyms": [
+                  "manager",
+                  "sir"
+                ]
               }
             },
             {
@@ -572,7 +765,9 @@
               "id": "OFFICE",
               "name": {
                 "value": "office",
-                "synonyms": ["work"]
+                "synonyms": [
+                  "work"
+                ]
               }
             },
             {

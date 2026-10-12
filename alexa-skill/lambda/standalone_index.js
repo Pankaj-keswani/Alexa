@@ -90,10 +90,10 @@ const LaunchRequestHandler = {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speechText = 'My Jarvis is online. You can find your phone, check battery or storage, control flashlight, adjust volume, launch apps, announce a message, or make calls. What can I do for you?';
+    const speechText = 'Jarvis is online. How can I help?';
     return handlerInput.responseBuilder
       .speak(speechText)
-      .reprompt('How can I help with your phone?')
+      .reprompt('You can say find phone, battery, torch on, or silent.')
       .getResponse();
   }
 };
@@ -288,7 +288,7 @@ const FlashlightIntentHandler = {
   },
   async handle(handlerInput) {
     const stateSlot = (getSlotVal(handlerInput, 'state') || '').toLowerCase();
-    const isOff = stateSlot.indexOf('off') !== -1 || stateSlot.indexOf('disable') !== -1 || stateSlot.indexOf('stop') !== -1;
+    const isOff = stateSlot.indexOf('off') !== -1 || stateSlot.indexOf('disable') !== -1 || stateSlot.indexOf('stop') !== -1 || stateSlot.indexOf('band') !== -1 || stateSlot.indexOf('bujha') !== -1;
     const targetState = !isOff;
 
     const res = await callBackend('/api/phone/flashlight', 'POST', { state: targetState });
@@ -403,11 +403,11 @@ const SetVolumeIntentHandler = {
   async handle(handlerInput) {
     const rawMode = (getSlotVal(handlerInput, 'mode') || 'normal').toLowerCase();
     let mode = 'NORMAL';
-    if (rawMode.indexOf('silent') !== -1 || rawMode.indexOf('mute') !== -1 || rawMode.indexOf('quiet') !== -1) {
+    if (rawMode.indexOf('silent') !== -1 || rawMode.indexOf('mute') !== -1 || rawMode.indexOf('quiet') !== -1 || rawMode.indexOf('chup') !== -1) {
       mode = 'SILENT';
     } else if (rawMode.indexOf('vibrate') !== -1) {
       mode = 'VIBRATE';
-    } else if (rawMode.indexOf('max') !== -1 || rawMode.indexOf('loud') !== -1) {
+    } else if (rawMode.indexOf('max') !== -1 || rawMode.indexOf('loud') !== -1 || rawMode.indexOf('full') !== -1 || rawMode.indexOf('tez') !== -1) {
       mode = 'MAX';
     }
 
