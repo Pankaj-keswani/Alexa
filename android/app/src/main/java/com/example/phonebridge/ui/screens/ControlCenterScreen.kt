@@ -23,14 +23,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.phonebridge.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ControlCenterScreen(
     isBridgeActive: Boolean,
     isEcoMode: Boolean,
+    isBedtimeShield: Boolean,
     networkType: String,
     batteryLevel: Int,
     isCharging: Boolean,
+    batteryTemp: Double,
+    batteryVoltage: Int,
+    batteryHealth: String,
     freeStorageGb: Long,
     totalStorageGb: Long,
     freeRamGb: String,
@@ -39,19 +43,26 @@ fun ControlCenterScreen(
     isAlarmPlaying: Boolean,
     soundMode: String,
     volumeLevel: Int,
+    customPhrases: List<String>,
     onToggleBridge: (Boolean) -> Unit,
     onToggleEcoMode: (Boolean) -> Unit,
+    onToggleBedtimeShield: (Boolean) -> Unit,
     onToggleFlashlight: () -> Unit,
+    onStrobeFlashlight: () -> Unit,
     onToggleAlarm: () -> Unit,
     onSetSoundProfile: (String) -> Unit,
     onSetVolume: (Int) -> Unit,
     onSpeakTts: (String) -> Unit,
+    onAddCustomPhrase: (String) -> Unit,
+    onRemoveCustomPhrase: (String) -> Unit,
     onOpenApp: (String) -> Unit,
     onRefreshStats: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     var ttsText by remember { mutableStateOf("") }
     var sliderValue by remember(volumeLevel) { mutableFloatStateOf(volumeLevel.toFloat()) }
+    var isAddingPhrase by remember { mutableStateOf(false) }
+    var newPhraseText by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -102,13 +113,21 @@ fun ControlCenterScreen(
         // Live Device Diagnostics Quick Bar
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             DiagnosticPill(
                 icon = if (isCharging) Icons.Default.BatteryChargingFull else Icons.Default.BatteryStd,
                 label = "$batteryLevel%",
                 subLabel = if (isCharging) "Charging" else "Battery",
                 accentColor = if (batteryLevel > 20) NeonGreen else ErrorRed,
+                modifier = Modifier.weight(1f)
+            )
+
+            DiagnosticPill(
+                icon = Icons.Default.DeviceThermostat,
+                label = "${batteryTemp.toInt()}°C",
+                subLabel = batteryHealth,
+                accentColor = if (batteryTemp > 40) ErrorRed else CyanPrimary,
                 modifier = Modifier.weight(1f)
             )
 
@@ -197,7 +216,7 @@ fun ControlCenterScreen(
                     )
                 }
 
-                Divider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -246,12 +265,62 @@ fun ControlCenterScreen(
                         )
                     )
                 }
+
+                HorizontalDivider(color = CyberCardBorder, modifier = Modifier.padding(vertical = 12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = CircleShape,
+                            color = (if (isBedtimeShield) Color(0xFFFFD700) else TextMuted).copy(alpha = 0.2f),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Bedtime,
+                                    contentDescription = null,
+                                    tint = if (isBedtimeShield) Color(0xFFFFD700) else TextMuted,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Bedtime Silent Shield",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = if (isBedtimeShield) "Shield Active • Alarms & noise muted" else "Normal • Alarms & speech allowed",
+                                color = if (isBedtimeShield) Color(0xFFFFD700) else TextSecondary,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+
+                    Switch(
+                        checked = isBedtimeShield,
+                        onCheckedChange = onToggleBedtimeShield,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.Black,
+                            checkedTrackColor = Color(0xFFFFD700),
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = CyberSurface
+                        )
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Hardware Controls: Torch & Siren
+        // Hardware Controls: Torch, Strobe & Siren
         Text(
             text = "HARDWARE QUICK TOGGLES",
             style = MaterialTheme.typography.labelLarge,
@@ -263,7 +332,7 @@ fun ControlCenterScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Flashlight Toggle Button
             Card(
@@ -284,25 +353,64 @@ fun ControlCenterScreen(
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
                         imageVector = if (isFlashlightOn) Icons.Default.FlashlightOn else Icons.Default.FlashlightOff,
                         contentDescription = "Flashlight",
                         tint = if (isFlashlightOn) Color(0xFFFFD700) else TextSecondary,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(30.dp)
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "FLASHLIGHT",
+                        text = "TORCH",
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        fontSize = 13.sp
+                        fontSize = 12.sp
                     )
                     Text(
-                        text = if (isFlashlightOn) "STATUS: ON" else "STATUS: OFF",
+                        text = if (isFlashlightOn) "ON" else "OFF",
                         color = if (isFlashlightOn) Color(0xFFFFD700) else TextMuted,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            // SOS Strobe Button
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onStrobeFlashlight() },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CyberCard),
+                border = CardDefaults.outlinedCardBorder().copy(
+                    brush = Brush.horizontalGradient(
+                        listOf(Color(0xFFFFD700).copy(alpha = 0.5f), CyberCardBorder)
+                    )
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bolt,
+                        contentDescription = "Strobe",
+                        tint = Color(0xFFFFD700),
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "SOS STROBE",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "8x BLINK",
+                        color = Color(0xFFFFD700),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -328,24 +436,24 @@ fun ControlCenterScreen(
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
                         imageVector = if (isAlarmPlaying) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone,
                         contentDescription = "Alarm",
                         tint = if (isAlarmPlaying) ErrorRed else TextSecondary,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(30.dp)
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "FIND PHONE SIREN",
+                        text = "SIREN",
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        fontSize = 13.sp
+                        fontSize = 12.sp
                     )
                     Text(
-                        text = if (isAlarmPlaying) "RINGING (90s max)" else "IDLE",
+                        text = if (isAlarmPlaying) "RINGING" else "IDLE",
                         color = if (isAlarmPlaying) ErrorRed else TextMuted,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
@@ -501,14 +609,116 @@ fun ControlCenterScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    QuickPhraseChip("Dinner is ready!") { ttsText = "Dinner is ready!" }
-                    QuickPhraseChip("Time to wake up!") { ttsText = "Time to wake up!" }
-                    QuickPhraseChip("Where are you?") { ttsText = "Where are you?" }
+                    Text(
+                        text = "Quick Presets (Tap to use)",
+                        color = TextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    TextButton(
+                        onClick = { isAddingPhrase = !isAddingPhrase },
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isAddingPhrase) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = null,
+                            tint = CyanPrimary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isAddingPhrase) "Cancel" else "+ Add Preset",
+                            color = CyanPrimary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                if (isAddingPhrase) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newPhraseText,
+                            onValueChange = { newPhraseText = it },
+                            placeholder = { Text("Enter phrase to speak...", fontSize = 12.sp) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = CyanPrimary,
+                                unfocusedBorderColor = CyberCardBorder,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            )
+                        )
+                        Button(
+                            onClick = {
+                                if (newPhraseText.isNotBlank()) {
+                                    onAddCustomPhrase(newPhraseText.trim())
+                                    newPhraseText = ""
+                                    isAddingPhrase = false
+                                }
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary)
+                        ) {
+                            Text("Save", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val phrasesToShow = if (customPhrases.isNotEmpty()) customPhrases else listOf("Dinner is ready!", "Time to wake up!", "Where are you?")
+                    phrasesToShow.forEach { phrase ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = CyberSurface,
+                            border = CardDefaults.outlinedCardBorder().copy(
+                                brush = Brush.horizontalGradient(listOf(CyberCardBorder, CyberCardBorder))
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .clickable { ttsText = phrase }
+                                    .padding(start = 10.dp, top = 4.dp, bottom = 4.dp, end = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = phrase,
+                                    color = Color.White,
+                                    fontSize = 11.sp
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                IconButton(
+                                    onClick = { onRemoveCustomPhrase(phrase) },
+                                    modifier = Modifier.size(18.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Remove",
+                                        tint = TextMuted,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Button(
                     onClick = {

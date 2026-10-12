@@ -325,6 +325,19 @@ class PhoneBridgeForegroundService : Service() {
             return
         }
 
+        // Bedtime Shield Check: blocks sirens and loud audio broadcasts while user is sleeping
+        if (prefs.isBedtimeShieldEnabled && (command.command == "FIND_PHONE" || command.command == "SPEAK_MESSAGE")) {
+            val result = CommandResponse(
+                requestId = command.requestId,
+                command = command.command,
+                success = false,
+                reason = "Phone is in Bedtime Shield mode. Noise actions are blocked to protect sleep."
+            )
+            webSocketManager?.sendCommandResult(result)
+            logEvent("JARVIS", "Bedtime Shield blocked ${command.command} to protect sleep", true)
+            return
+        }
+
         when (command.command) {
             "ANSWER_CALL" -> executeAnswerCommand(command.requestId)
             "REJECT_CALL" -> executeRejectCommand(command.requestId)

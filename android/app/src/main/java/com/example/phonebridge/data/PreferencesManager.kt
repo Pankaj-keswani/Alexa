@@ -106,4 +106,21 @@ class PreferencesManager(context: Context) {
     fun getAllFeatureStates(): Map<String, Boolean> {
         return ALL_FEATURES.associateWith { isFeatureEnabled(it) }
     }
+
+    var isBedtimeShieldEnabled: Boolean
+        get() = prefs.getBoolean("bedtime_shield_enabled", false)
+        set(value) = prefs.edit().putBoolean("bedtime_shield_enabled", value).apply()
+
+    fun getCustomPhrases(): List<String> {
+        val raw = prefs.getString("custom_tts_phrases", null)
+        return if (raw.isNullOrBlank()) {
+            listOf("Dinner is ready!", "Time to wake up!", "Where are you?", "Chai peelo!", "Come downstairs!")
+        } else {
+            raw.split("|||").filter { it.isNotBlank() }
+        }
+    }
+
+    fun saveCustomPhrases(phrases: List<String>) {
+        prefs.edit().putString("custom_tts_phrases", phrases.joinToString("|||")).apply()
+    }
 }

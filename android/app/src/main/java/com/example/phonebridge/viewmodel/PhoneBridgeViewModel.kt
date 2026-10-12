@@ -91,6 +91,24 @@ class PhoneBridgeViewModel(application: Application) : AndroidViewModel(applicat
     val isEcoMode = MutableStateFlow(prefs.isEcoMode)
     val pingIntervalSeconds = MutableStateFlow(prefs.pingIntervalSeconds)
 
+    // Hardware Thermal & Health
+    private val _batteryTemperature = MutableStateFlow(28.5)
+    val batteryTemperature: StateFlow<Double> = _batteryTemperature.asStateFlow()
+
+    private val _batteryVoltage = MutableStateFlow(3850)
+    val batteryVoltage: StateFlow<Int> = _batteryVoltage.asStateFlow()
+
+    private val _batteryHealth = MutableStateFlow("Good")
+    val batteryHealth: StateFlow<String> = _batteryHealth.asStateFlow()
+
+    // Bedtime Silent Shield Mode
+    private val _isBedtimeShield = MutableStateFlow(prefs.isBedtimeShieldEnabled)
+    val isBedtimeShield: StateFlow<Boolean> = _isBedtimeShield.asStateFlow()
+
+    // Custom TTS phrases
+    private val _customPhrases = MutableStateFlow(prefs.getCustomPhrases())
+    val customPhrases: StateFlow<List<String>> = _customPhrases.asStateFlow()
+
     // Feature toggles for Alexa voice control
     private val _featureStates = MutableStateFlow<Map<String, Boolean>>(prefs.getAllFeatureStates())
     val featureStates: StateFlow<Map<String, Boolean>> = _featureStates.asStateFlow()
@@ -102,6 +120,43 @@ class PhoneBridgeViewModel(application: Application) : AndroidViewModel(applicat
         _featureStates.value = updated
         val featName = com.example.phonebridge.data.JarvisFeatureRegistry.getFeatureById(featureId)?.name ?: featureId
         _statusMessage.value = "$featName ${if (enabled) "enabled" else "disabled"} for Alexa"
+    }
+
+    fun bulkToggleFeatures(enabled: Boolean) {
+        com.example.phonebridge.data.PreferencesManager.ALL_FEATURES.forEach { feat ->
+            prefs.setFeatureEnabled(feat, enabled)
+        }
+        _featureStates.value = prefs.getAllFeatureStates()
+        _statusMessage.value = if (enabled) "All 11 features enabled for Alexa" else "All features disabled for Alexa"
+    }
+
+    fun toggleBedtimeShield(enabled: Boolean) {
+        prefs.isBedtimeShieldEnabled = enabled
+        _isBedtimeShield.value = enabled
+        _statusMessage.value = if (enabled) "Bedtime Shield Active (Alexa alarms silenced)" else "Bedtime Shield Disabled"
+    }
+
+    fun strobeFlashlight() {
+        getJarvisController().strobeFlashlight()
+        _statusMessage.value = "Strobe SOS flasher triggered!"
+    }
+
+    fun addCustomPhrase(phrase: String) {
+        if (phrase.isBlank()) return
+        val current = _customPhrases.value.toMutableList()
+        if (!current.contains(phrase.trim())) {
+            current.add(phrase.trim())
+            prefs.saveCustomPhrases(current)
+            _customPhrases.value = current
+            _statusMessage.value = "Added phrase: \"${phrase.trim()}\""
+        }
+    }
+
+    fun removeCustomPhrase(phrase: String) {
+        val current = _customPhrases.value.toMutableList()
+        current.remove(phrase)
+        prefs.saveCustomPhrases(current)
+        _customPhrases.value = current
     }
 
     init {
@@ -151,6 +206,9 @@ class PhoneBridgeViewModel(application: Application) : AndroidViewModel(applicat
             if (batRes.success && batMap != null) {
                 _batteryLevel.value = (batMap["batteryLevel"] as? Number)?.toInt() ?: 100
                 _isBatteryCharging.value = (batMap["isCharging"] as? Boolean) ?: false
+                _batteryTemperature.value = (batMap["temperatureC"] as? Number)?.toDouble() ?: 28.5
+                _batteryVoltage.value = (batMap["voltageMv"] as? Number)?.toInt() ?: 3850
+                _batteryHealth.value = (batMap["health"] as? String) ?: "Good"
             }
 
             val statRes = controller.getDeviceStats(null)

@@ -36,13 +36,17 @@ fun MainDashboardScreen(
     isDefaultDialer: Boolean,
     statusMessage: String?,
     featureStates: Map<String, Boolean>,
+    isBedtimeShield: Boolean = false,
+    batteryTemp: Double = 28.5,
     onToggleFeature: (String, Boolean) -> Unit,
+    onBulkToggle: ((Boolean) -> Unit)? = null,
     onTestBackend: () -> Unit,
     onTestAlexa: () -> Unit,
     onTestCallState: () -> Unit,
     onRequestPhoneRole: () -> Unit,
     onQuickSimulateCall: () -> Unit,
     onTestFlashlight: () -> Unit,
+    onStrobeFlashlight: (() -> Unit)? = null,
     onTestAlarm: () -> Unit,
     onTestSoundMode: (String) -> Unit,
     onTestTts: (String) -> Unit,
@@ -129,7 +133,9 @@ fun MainDashboardScreen(
         // Connection Status Card
         ConnectionStatusCard(
             isBackendConnected = isBackendConnected,
-            isAlexaConfigured = isAlexaConfigured
+            isAlexaConfigured = isAlexaConfigured,
+            isBedtimeShield = isBedtimeShield,
+            batteryTemp = batteryTemp
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -155,7 +161,9 @@ fun MainDashboardScreen(
         InteractiveFeaturePanels(
             featureStates = featureStates,
             onToggleFeature = onToggleFeature,
+            onBulkToggle = onBulkToggle,
             onTestFlashlight = onTestFlashlight,
+            onStrobeFlashlight = onStrobeFlashlight,
             onTestAlarm = onTestAlarm,
             onTestSimulateCall = onQuickSimulateCall,
             onTestSoundMode = onTestSoundMode,

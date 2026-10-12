@@ -200,9 +200,24 @@ class PhoneJarvisController(private val context: Context) {
             val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                     status == BatteryManager.BATTERY_STATUS_FULL
 
+            val tempRaw = batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
+            val tempC = if (tempRaw > 0) tempRaw / 10.0 else 25.0
+            val voltageMv = batteryStatus?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) ?: 3800
+
+            val healthInt = batteryStatus?.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_GOOD)
+            val healthStr = when (healthInt) {
+                BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
+                BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> "Over Voltage"
+                BatteryManager.BATTERY_HEALTH_DEAD -> "Dead"
+                else -> "Good"
+            }
+
             val data = mapOf(
                 "batteryLevel" to batteryPct,
-                "isCharging" to isCharging
+                "isCharging" to isCharging,
+                "temperatureC" to tempC,
+                "voltageMv" to voltageMv,
+                "health" to healthStr
             )
 
             CommandResponse(
@@ -254,6 +269,36 @@ class PhoneJarvisController(private val context: Context) {
                 reason = "Flashlight error: ${e.message}"
             )
         }
+    }
+
+    /**
+     * STROBE FLASHLIGHT: Rapidly blinks camera LED for finding phone or SOS alerts
+     */
+    fun strobeFlashlight(flashes: Int = 8, intervalMs: Long = 150) {
+        val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as? CameraManager
+        val cameraId = cameraManager?.cameraIdList?.firstOrNull() ?: return
+
+        var count = 0
+        val maxSteps = flashes * 2
+        val runnable = object : Runnable {
+            override fun run() {
+                if (count < maxSteps) {
+                    val turnOn = (count % 2 == 0)
+                    try {
+                        cameraManager.setTorchMode(cameraId, turnOn)
+                        isFlashlightOn = turnOn
+                    } catch (_: Exception) {}
+                    count++
+                    mainHandler.postDelayed(this, intervalMs)
+                } else {
+                    try {
+                        cameraManager.setTorchMode(cameraId, false)
+                        isFlashlightOn = false
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+        mainHandler.post(runnable)
     }
 
     fun isFlashlightActive(): Boolean = isFlashlightOn

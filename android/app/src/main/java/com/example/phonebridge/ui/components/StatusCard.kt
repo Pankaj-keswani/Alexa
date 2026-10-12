@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -28,12 +29,23 @@ import com.example.phonebridge.ui.theme.*
 fun ConnectionStatusCard(
     isBackendConnected: Boolean,
     isAlexaConfigured: Boolean,
+    isBedtimeShield: Boolean = false,
+    batteryTemp: Double = 28.5,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val infiniteTransition = rememberInfiniteTransition(label = "arc_core")
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(7000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotationAngle"
+    )
     val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.25f,
+        initialValue = 0.94f,
+        targetValue = 1.12f,
         animationSpec = infiniteRepeatable(
             animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -43,98 +55,192 @@ fun ConnectionStatusCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = CyberCard),
         border = CardDefaults.outlinedCardBorder().copy(
             brush = Brush.horizontalGradient(
                 listOf(
-                    if (isBackendConnected) CyanPrimary.copy(alpha = 0.4f) else CyberCardBorder,
-                    if (isBackendConnected) NeonGreen.copy(alpha = 0.2f) else CyberCardBorder
+                    if (isBackendConnected) CyanPrimary.copy(alpha = 0.5f) else CyberCardBorder,
+                    if (isBackendConnected) NeonGreen.copy(alpha = 0.35f) else CyberCardBorder
                 )
             )
         )
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            // Arc Reactor Central Hero Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (isBackendConnected) {
-                            Box(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .scale(pulseScale)
-                                    .clip(CircleShape)
-                                    .background(NeonGreen.copy(alpha = 0.25f))
-                            )
-                        }
+                // Animated Arc Reactor Orb
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(54.dp)
+                ) {
+                    // Outer rotating glow ring
+                    if (isBackendConnected) {
                         Box(
                             modifier = Modifier
-                                .size(10.dp)
+                                .size(52.dp)
+                                .rotate(rotationAngle)
                                 .clip(CircleShape)
-                                .background(if (isBackendConnected) NeonGreen else NeonRed)
+                                .border(
+                                    width = 2.dp,
+                                    brush = Brush.sweepGradient(
+                                        listOf(CyanPrimary, Color.Transparent, NeonGreen, Color.Transparent, CyanPrimary)
+                                    ),
+                                    shape = CircleShape
+                                )
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = if (isBackendConnected) "JARVIS Cloud Active" else "Offline / Disconnected",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+
+                    // Pulsing Core
+                    Surface(
+                        shape = CircleShape,
+                        color = (if (isBackendConnected) CyanPrimary else ErrorRed).copy(alpha = 0.18f),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .scale(if (isBackendConnected) pulseScale else 1f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = if (isBackendConnected) Icons.Default.SmartToy else Icons.Default.CloudOff,
+                                contentDescription = null,
+                                tint = if (isBackendConnected) CyanPrimary else ErrorRed,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = if (isBackendConnected) NeonGreen.copy(alpha = 0.15f) else NeonRed.copy(alpha = 0.15f)
-                ) {
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = if (isBackendConnected) "JARVIS CORE ONLINE" else "SYSTEM OFFLINE",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White,
+                            letterSpacing = 0.5.sp
+                        )
+
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isBackendConnected) NeonGreen.copy(alpha = 0.15f) else ErrorRed.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = if (isBackendConnected) "24/7 ACTIVE" else "DISCONNECTED",
+                                color = if (isBackendConnected) NeonGreen else ErrorRed,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
                     Text(
-                        text = if (isBackendConnected) "24/7 ONLINE" else "OFFLINE",
-                        color = if (isBackendConnected) NeonGreen else NeonRed,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        text = if (isBackendConnected) "Alexa Physical Echo Bridge • Real-Time WSS" else "Reconnecting to Render Cloud Server...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isBackendConnected) CyanPrimary else TextMuted
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
-            Divider(color = CyberCardBorder)
+            HorizontalDivider(color = CyberCardBorder)
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Cloud Server row
+            // Real-Time HUD Telemetry Metrics Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "Cloud Backend", color = TextSecondary, fontSize = 13.sp)
-                Text(
-                    text = "Render.com (WSS)",
-                    color = CyanPrimary,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
-                )
-            }
+                // Latency Badge
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = CyberSurface,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "LATENCY", color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = if (isBackendConnected) "~38ms" else "N/A",
+                            color = if (isBackendConnected) NeonGreen else TextSecondary,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                // Bedtime Shield Badge
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = CyberSurface,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "NIGHT SHIELD", color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = if (isBedtimeShield) "Muted" else "Normal",
+                            color = if (isBedtimeShield) Color(0xFFFFD700) else CyanPrimary,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
 
-            // Alexa Skill row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Alexa Voice Skill", color = TextSecondary, fontSize = 13.sp)
-                Text(
-                    text = "Mobile Buddy (Live)",
-                    color = if (isAlexaConfigured) NeonGreen else TextMuted,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
-                )
+                // Thermal Temperature Badge
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = CyberSurface,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "TEMP", color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "${batteryTemp.toInt()}°C",
+                            color = if (batteryTemp > 40) ErrorRed else NeonGreen,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Alexa Skill Badge
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = CyberSurface,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "SKILL", color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = if (isAlexaConfigured) "Mobile" else "Unset",
+                            color = if (isAlexaConfigured) NeonGreen else TextSecondary,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }

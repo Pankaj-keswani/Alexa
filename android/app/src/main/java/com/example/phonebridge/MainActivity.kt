@@ -93,6 +93,13 @@ class MainActivity : ComponentActivity() {
                 val isTestMode by viewModel.isTestMode.collectAsState()
                 val featureStates by viewModel.featureStates.collectAsState()
 
+                // Advanced diagnostics, silent shield & custom phrases
+                val batteryTemperature by viewModel.batteryTemperature.collectAsState()
+                val batteryVoltage by viewModel.batteryVoltage.collectAsState()
+                val batteryHealth by viewModel.batteryHealth.collectAsState()
+                val isBedtimeShield by viewModel.isBedtimeShield.collectAsState()
+                val customPhrases by viewModel.customPhrases.collectAsState()
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
@@ -183,13 +190,17 @@ class MainActivity : ComponentActivity() {
                                 isDefaultDialer = isDefaultDialer,
                                 statusMessage = statusMessage,
                                 featureStates = featureStates,
+                                isBedtimeShield = isBedtimeShield,
+                                batteryTemp = batteryTemperature,
                                 onToggleFeature = { featId, enabled -> viewModel.toggleFeature(featId, enabled) },
+                                onBulkToggle = { viewModel.bulkToggleFeatures(it) },
                                 onTestBackend = { viewModel.testBackendConnection() },
                                 onTestAlexa = { viewModel.testAlexaIntegration() },
                                 onTestCallState = { viewModel.testCallState() },
                                 onRequestPhoneRole = { requestPhoneDialerRole() },
                                 onQuickSimulateCall = { viewModel.simulateIncomingCall("Rahul", "+919876543210") },
                                 onTestFlashlight = { viewModel.toggleFlashlight() },
+                                onStrobeFlashlight = { viewModel.strobeFlashlight() },
                                 onTestAlarm = { viewModel.toggleAlarm() },
                                 onTestSoundMode = { viewModel.setSoundProfile(it) },
                                 onTestTts = { viewModel.speakTts(it) },
@@ -199,9 +210,13 @@ class MainActivity : ComponentActivity() {
                             1 -> ControlCenterScreen(
                                 isBridgeActive = isBridgeActive,
                                 isEcoMode = isEcoMode,
+                                isBedtimeShield = isBedtimeShield,
                                 networkType = networkType,
                                 batteryLevel = batteryLevel,
                                 isCharging = isBatteryCharging,
+                                batteryTemp = batteryTemperature,
+                                batteryVoltage = batteryVoltage,
+                                batteryHealth = batteryHealth,
                                 freeStorageGb = freeStorageGb,
                                 totalStorageGb = totalStorageGb,
                                 freeRamGb = freeRamGb,
@@ -210,13 +225,18 @@ class MainActivity : ComponentActivity() {
                                 isAlarmPlaying = isAlarmPlaying,
                                 soundMode = soundMode,
                                 volumeLevel = volumeLevel,
+                                customPhrases = customPhrases,
                                 onToggleBridge = { viewModel.toggleBridge(it) },
                                 onToggleEcoMode = { viewModel.toggleEcoMode(it) },
+                                onToggleBedtimeShield = { viewModel.toggleBedtimeShield(it) },
                                 onToggleFlashlight = { viewModel.toggleFlashlight() },
+                                onStrobeFlashlight = { viewModel.strobeFlashlight() },
                                 onToggleAlarm = { viewModel.toggleAlarm() },
                                 onSetSoundProfile = { viewModel.setSoundProfile(it) },
                                 onSetVolume = { viewModel.setVolumePercent(it) },
                                 onSpeakTts = { viewModel.speakTts(it) },
+                                onAddCustomPhrase = { viewModel.addCustomPhrase(it) },
+                                onRemoveCustomPhrase = { viewModel.removeCustomPhrase(it) },
                                 onOpenApp = { viewModel.openAppDirect(it) },
                                 onRefreshStats = { viewModel.refreshDeviceStats() }
                             )

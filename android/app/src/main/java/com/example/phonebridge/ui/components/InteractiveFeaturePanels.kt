@@ -8,10 +8,14 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,7 +39,9 @@ import com.example.phonebridge.ui.theme.*
 fun InteractiveFeaturePanels(
     featureStates: Map<String, Boolean>,
     onToggleFeature: (String, Boolean) -> Unit,
+    onBulkToggle: ((Boolean) -> Unit)? = null,
     onTestFlashlight: (() -> Unit)? = null,
+    onStrobeFlashlight: (() -> Unit)? = null,
     onTestAlarm: (() -> Unit)? = null,
     onTestSimulateCall: (() -> Unit)? = null,
     onTestSoundMode: ((String) -> Unit)? = null,
@@ -43,8 +49,27 @@ fun InteractiveFeaturePanels(
     modifier: Modifier = Modifier
 ) {
     var expandedFeatureId by remember { mutableStateOf<String?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("All") }
+
+    val activeCount = featureStates.values.count { it }
+    val totalCount = JarvisFeatureRegistry.features.size
+
+    val filteredFeatures = remember(searchQuery, selectedCategory, featureStates) {
+        JarvisFeatureRegistry.features.filter { feat ->
+            val matchesCategory = (selectedCategory == "All" || feat.category == selectedCategory)
+            val q = searchQuery.trim().lowercase()
+            val matchesQuery = q.isEmpty() ||
+                    feat.name.lowercase().contains(q) ||
+                    feat.summary.lowercase().contains(q) ||
+                    feat.shortCommands.any { it.lowercase().contains(q) } ||
+                    feat.hinglishCommands.any { it.lowercase().contains(q) }
+            matchesCategory && matchesQuery
+        }
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
+        // Section Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -59,16 +84,163 @@ fun InteractiveFeaturePanels(
                     letterSpacing = 0.5.sp
                 )
                 Text(
-                    text = "Tap any panel to view all voice commands & toggle Alexa control",
+                    text = "Search & tap any panel to customize voice controls",
                     style = MaterialTheme.typography.bodySmall,
                     color = CyanPrimary
                 )
             }
+
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = CyanPrimary.copy(alpha = 0.15f),
+                border = CardDefaults.outlinedCardBorder().copy(
+                    brush = Brush.horizontalGradient(listOf(CyanPrimary.copy(alpha = 0.4f), Color.Transparent))
+                )
+            ) {
+                Text(
+                    text = "$activeCount / $totalCount Active",
+                    color = CyanPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        JarvisFeatureRegistry.features.forEach { feature ->
+        // Search Bar with Clear Button
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Search voice commands (e.g. torch, ring, battery, call...)", fontSize = 12.sp) },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null, tint = CyanPrimary, modifier = Modifier.size(18.dp))
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear", tint = TextSecondary, modifier = Modifier.size(16.dp))
+                    }
+                }
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = CyanPrimary,
+                unfocusedBorderColor = CyberCardBorder,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Category Filter Chips
+        val categoryScroll = rememberScrollState()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(categoryScroll),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            JarvisFeatureRegistry.categories.forEach { cat ->
+                val isSelected = selectedCategory == cat
+                Surface(
+                    modifier = Modifier.clickable { selectedCategory = cat },
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) CyanPrimary else CyberCard,
+                    border = CardDefaults.outlinedCardBorder().copy(
+                        brush = Brush.horizontalGradient(
+                            listOf(
+                                if (isSelected) CyanPrimary else CyberCardBorder,
+                                if (isSelected) CyanPrimary else CyberCardBorder
+                            )
+                        )
+                    )
+                ) {
+                    Text(
+                        text = cat,
+                        color = if (isSelected) Color.Black else TextSecondary,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 11.sp,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Bulk Actions Bar: Enable All / Disable All
+        if (onBulkToggle != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Bulk Alexa Controls:",
+                    fontSize = 11.sp,
+                    color = TextMuted,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Surface(
+                        modifier = Modifier.clickable { onBulkToggle(true) },
+                        shape = RoundedCornerShape(6.dp),
+                        color = NeonGreen.copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            text = "Enable All",
+                            color = NeonGreen,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+
+                    Surface(
+                        modifier = Modifier.clickable { onBulkToggle(false) },
+                        shape = RoundedCornerShape(6.dp),
+                        color = ErrorRed.copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            text = "Disable All",
+                            color = ErrorRed,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
+        // Empty Search State
+        if (filteredFeatures.isEmpty()) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = CyberCard
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(Icons.Default.SearchOff, contentDescription = null, tint = TextMuted, modifier = Modifier.size(32.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text("No commands matched \"$searchQuery\"", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("Try searching for torch, call, battery, ring, volume, etc.", color = TextSecondary, fontSize = 11.sp)
+                }
+            }
+        }
+
+        // Feature Panels List
+        filteredFeatures.forEach { feature ->
             val isEnabled = featureStates[feature.id] ?: true
             val isExpanded = expandedFeatureId == feature.id
 
@@ -83,6 +255,7 @@ fun InteractiveFeaturePanels(
                     onToggleFeature(feature.id, enabled)
                 },
                 onTestFlashlight = onTestFlashlight,
+                onStrobeFlashlight = onStrobeFlashlight,
                 onTestAlarm = onTestAlarm,
                 onTestSimulateCall = onTestSimulateCall,
                 onTestSoundMode = onTestSoundMode,
@@ -102,6 +275,7 @@ fun FeaturePanelCard(
     onCardClick: () -> Unit,
     onToggle: (Boolean) -> Unit,
     onTestFlashlight: (() -> Unit)?,
+    onStrobeFlashlight: (() -> Unit)?,
     onTestAlarm: (() -> Unit)?,
     onTestSimulateCall: (() -> Unit)?,
     onTestSoundMode: ((String) -> Unit)?,
@@ -125,7 +299,7 @@ fun FeaturePanelCard(
                 } else if (isEnabled) {
                     listOf(CyberCardBorder, CyberCardBorder)
                 } else {
-                    listOf(ErrorRed.copy(alpha = 0.3f), CyberCardBorder)
+                    listOf(ErrorRed.copy(alpha = 0.35f), CyberCardBorder)
                 }
             )
         )
@@ -159,12 +333,26 @@ fun FeaturePanelCard(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
-                        Text(
-                            text = feature.name,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            fontSize = 14.sp
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = feature.name,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = CyberSurface
+                            ) {
+                                Text(
+                                    text = feature.category,
+                                    color = TextMuted,
+                                    fontSize = 9.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                         Text(
                             text = feature.summary,
                             color = TextSecondary,
@@ -210,7 +398,7 @@ fun FeaturePanelCard(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(14.dp))
-                    Divider(color = CyberCardBorder)
+                    HorizontalDivider(color = CyberCardBorder)
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // 1. Alexa Control Master Toggle
@@ -257,6 +445,7 @@ fun FeaturePanelCard(
                     FeatureActionButtons(
                         featureId = feature.id,
                         onTestFlashlight = onTestFlashlight,
+                        onStrobeFlashlight = onStrobeFlashlight,
                         onTestAlarm = onTestAlarm,
                         onTestSimulateCall = onTestSimulateCall,
                         onTestSoundMode = onTestSoundMode,
@@ -386,6 +575,7 @@ private fun CommandChipsRow(commands: List<String>, accentColor: Color) {
 private fun FeatureActionButtons(
     featureId: String,
     onTestFlashlight: (() -> Unit)?,
+    onStrobeFlashlight: (() -> Unit)?,
     onTestAlarm: (() -> Unit)?,
     onTestSimulateCall: (() -> Unit)?,
     onTestSoundMode: ((String) -> Unit)?,
@@ -395,15 +585,32 @@ private fun FeatureActionButtons(
         PreferencesManager.FEATURE_FLASHLIGHT -> {
             if (onTestFlashlight != null) {
                 Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = onTestFlashlight,
-                    colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Default.FlashlightOn, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Toggle Flashlight Test", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Button(
+                        onClick = onTestFlashlight,
+                        colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.FlashlightOn, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Toggle Torch", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
+
+                    if (onStrobeFlashlight != null) {
+                        OutlinedButton(
+                            onClick = onStrobeFlashlight,
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.Bolt, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("SOS Strobe", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
                 }
             }
         }
@@ -492,11 +699,11 @@ private fun getFeatureIcon(featureId: String): ImageVector {
         PreferencesManager.FEATURE_FLASHLIGHT -> Icons.Default.FlashlightOn
         PreferencesManager.FEATURE_CALL -> Icons.Default.PhoneInTalk
         PreferencesManager.FEATURE_MAKE_CALL -> Icons.Default.Phone
-        PreferencesManager.FEATURE_VOLUME -> Icons.Default.VolumeUp
+        PreferencesManager.FEATURE_VOLUME -> Icons.AutoMirrored.Filled.VolumeUp
         PreferencesManager.FEATURE_BATTERY -> Icons.Default.BatteryChargingFull
         PreferencesManager.FEATURE_DEVICE_STATS -> Icons.Default.Storage
         PreferencesManager.FEATURE_INTERCOM -> Icons.Default.RecordVoiceOver
-        PreferencesManager.FEATURE_WHATSAPP -> Icons.Default.Chat
+        PreferencesManager.FEATURE_WHATSAPP -> Icons.AutoMirrored.Filled.Chat
         PreferencesManager.FEATURE_SMS -> Icons.Default.Sms
         PreferencesManager.FEATURE_OPEN_APP -> Icons.Default.Apps
         else -> Icons.Default.SmartToy
